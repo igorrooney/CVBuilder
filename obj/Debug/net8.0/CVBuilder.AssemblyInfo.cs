@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("df081a57-b2bc-4570-a09d-d3d95a9eaaa3")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("CVBuilder")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd8e0fe1163274bbcf695a46b7d57896367961be")]
 [assembly: System.Reflection.AssemblyProductAttribute("CVBuilder")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CVBuilder")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
