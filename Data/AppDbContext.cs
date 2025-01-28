@@ -9,6 +9,7 @@ namespace CVBuilder.Data
 
         public DbSet<CV> CVs { get; set; }
         public DbSet<WorkExperience> WorkExperiences { get; set; }
-        // Add other DbSets
+        public DbSet<Education> Educations { get; set; }
+        // Add other DbSets as needed
     }
 }
