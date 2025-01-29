@@ -28,7 +28,7 @@ Welcome to **CV Builder**, an open-source project designed to help users create 
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/CVBuilder.git
+   git clone https://github.com/igorrooney/CVBuilder.git
 2. Navigate to the project directory:
 	```bash
 	cd CVBuilder
