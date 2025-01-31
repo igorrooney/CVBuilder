@@ -2,15 +2,22 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace CVBuilder.Data
+public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser>
-    {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<CV> CVs { get; set; }
-        public DbSet<WorkExperience> WorkExperiences { get; set; }
-        public DbSet<Education> Educations { get; set; }
-        // Add other DbSets as needed
+    public DbSet<CV> CVs { get; set; }
+    public DbSet<WorkExperience> WorkExperiences { get; set; }
+    public DbSet<Education> Educations { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        // Configure the relationship (optional if conventions are followed)
+        builder.Entity<CV>()
+            .HasOne(c => c.User)
+            .WithMany(u => u.CVs)
+            .HasForeignKey(c => c.UserId);
     }
 }

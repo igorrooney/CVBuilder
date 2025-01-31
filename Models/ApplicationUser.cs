@@ -6,8 +6,9 @@ namespace CVBuilder.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string FullName => $"{FirstName} {LastName}";
+        public string FullName { get; }
         public string? ProfilePictureUrl { get; set; }
         public DateTime? DateOfBirth { get; set; }
+        public ICollection<CV> CVs { get; set; }
     }
 }

@@ -1,4 +1,3 @@
-using CVBuilder.Data;
 using CVBuilder.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
