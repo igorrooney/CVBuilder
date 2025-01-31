@@ -167,6 +167,8 @@ namespace CVBuilder.Areas.Identity.Pages.Account
             try
             {
                 var user = Activator.CreateInstance<ApplicationUser>();
+                user.UserName = Input.Email; // Set UserName to the email
+                user.Email = Input.Email;
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
                 return user;
