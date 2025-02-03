@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CVBuilder.Models
 {
-    public class Education
+    public class Certification
     {
         [Key]
         public int Id { get; set; }
@@ -13,12 +13,10 @@ namespace CVBuilder.Models
         public CV? CV { get; set; }
 
         [Required]
-        public string Degree { get; set; }
+        public string CertificationName { get; set; }
 
-        [Required]
-        public string Institution { get; set; }
+        public string IssuedBy { get; set; }
 
-        [Required]
-        public int GraduationYear { get; set; }
+        public DateTime? IssueDate { get; set; }
     }
 }
