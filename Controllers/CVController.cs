@@ -210,7 +210,8 @@ namespace CVBuilder.Controllers
             if (cv == null) return NotFound();
 
             var pdfBytes = _pdfService.GenerateCvPdf(cv);
-            return File(pdfBytes, "application/pdf", "CV.pdf");
+
+            return File(pdfBytes, "application/pdf", $"{cv.FirstName}_{cv.LastName}_CV.pdf");
         }
     }
 }
