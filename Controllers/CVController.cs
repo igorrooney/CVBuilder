@@ -30,6 +30,7 @@ public class CVController : Controller
         if (ModelState.IsValid)
         {
             var user = await _userManager.GetUserAsync(User); // Get logged-in user
+            Console.WriteLine(user);
             cv.UserId = user.Id; // Assign the user's ID to the CV
             _context.CVs.Add(cv);
             await _context.SaveChangesAsync();
