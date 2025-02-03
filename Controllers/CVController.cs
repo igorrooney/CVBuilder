@@ -47,29 +47,44 @@ namespace CVBuilder.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CV cv)
         {
-            try
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                {
-                    return RedirectToPage("/Identity/Account/Login");
-                }
+                return RedirectToPage("/Identity/Account/Login");
+            }
 
-                if (ModelState.IsValid)
+            // Assign UserId
+            cv.UserId = user.Id;
+            cv.User = user;
+
+            // Ensure Educations are added explicitly
+            if (cv.Educations != null)
+            {
+                foreach (var edu in cv.Educations)
                 {
-                    cv.UserId = user.Id;
-                    _context.CVs.Add(cv);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    edu.CVId = cv.Id;  // Ensure foreign key assignment
+                    _context.Educations.Add(edu);
                 }
             }
-            catch (Exception ex)
+
+            ModelState.Remove("UserId");
+            ModelState.Remove("User");
+
+            if (!ModelState.IsValid)
             {
-                Console.WriteLine($"Error creating CV: {ex.Message}");
-                ModelState.AddModelError("", "An error occurred while saving the CV. Please try again.");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                }
+                return View(cv);
             }
-            return View(cv);
+
+            _context.CVs.Add(cv);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
+
+
 
         // GET: CV/Edit/{id}
         public async Task<IActionResult> Edit(int id)

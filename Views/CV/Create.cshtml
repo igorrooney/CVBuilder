@@ -1,25 +1,143 @@
 ﻿@model CVBuilder.Models.CV
+@{
+    ViewData["Title"] = "Create CV";
+}
 
-<form asp-action="Create">
+<h2>Create Your CV</h2>
+
+<form asp-action="Create" method="post">
     <div class="form-group">
-        <label asp-for="FirstName" class="control-label"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" class="form-control" required />
     </div>
+
     <div class="form-group">
-        <label asp-for="LastName" class="control-label"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" class="form-control" required />
     </div>
+
     <div class="form-group">
-        <label asp-for="Email" class="control-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+        <label asp-for="PhoneNumber"></label>
+        <input asp-for="PhoneNumber" class="form-control" required />
     </div>
+
     <div class="form-group">
-        <label asp-for="PhoneNumber" class="control-label"></label>
-        <input asp-for="PhoneNumber" class="form-control" />
-        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" required />
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
+
+    <div class="form-group">
+        <label asp-for="Summary"></label>
+        <textarea asp-for="Summary" class="form-control" required></textarea>
+    </div>
+
+    <hr />
+
+    <!-- Work Experience Section -->
+    <h3>Work Experience</h3>
+    <div id="work-experience-container">
+        <div class="work-experience">
+            <div class="form-group">
+                <label>Job Title</label>
+                <input name="WorkExperiences[0].JobTitle" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>Company</label>
+                <input name="WorkExperiences[0].Company" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" name="WorkExperiences[0].StartDate" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>End Date</label>
+                <input type="date" name="WorkExperiences[0].EndDate" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Responsibilities</label>
+                <textarea name="WorkExperiences[0].Responsibilities" class="form-control"></textarea>
+            </div>
+        </div>
+    </div>
+    <button type="button" id="add-work-experience" class="btn btn-secondary">Add More Work Experience</button>
+
+    <hr />
+
+    <!-- Education Section -->
+    <h3>Education</h3>
+    <div id="education-container">
+        <div class="education">
+            <div class="form-group">
+                <label>Degree</label>
+                <input name="Educations[0].Degree" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>Institution</label>
+                <input name="Educations[0].Institution" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label>Graduation Year</label>
+                <input type="number" name="Educations[0].GraduationYear" class="form-control" required />
+            </div>
+        </div>
+    </div>
+    <button type="button" id="add-education" class="btn btn-secondary">Add More Education</button>
+
+    <hr />
+
+    <button type="submit" class="btn btn-primary">Save CV</button>
 </form>
+
+<script>
+    document.getElementById('add-work-experience').addEventListener('click', function() {
+        let index = document.querySelectorAll('.work-experience').length;
+        let container = document.getElementById('work-experience-container');
+        let template = `
+            <div class="work-experience">
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <input name="WorkExperiences[${index}].JobTitle" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Company</label>
+                    <input name="WorkExperiences[${index}].Company" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" name="WorkExperiences[${index}].StartDate" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" name="WorkExperiences[${index}].EndDate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Responsibilities</label>
+                    <textarea name="WorkExperiences[${index}].Responsibilities" class="form-control"></textarea>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', template);
+    });
+
+    document.getElementById('add-education').addEventListener('click', function() {
+        let index = document.querySelectorAll('.education').length;
+        let container = document.getElementById('education-container');
+        let template = `
+            <div class="education">
+                <div class="form-group">
+                    <label>Degree</label>
+                    <input name="Educations[${index}].Degree" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Institution</label>
+                    <input name="Educations[${index}].Institution" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Graduation Year</label>
+                    <input type="number" name="Educations[${index}].GraduationYear" class="form-control" required />
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', template);
+    });
+</script>

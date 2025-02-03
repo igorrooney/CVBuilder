@@ -24,9 +24,9 @@ namespace CVBuilder.Models
         public DateTime? EndDate { get; set; } // Nullable for current jobs
 
         [StringLength(1000)]
-        public string Responsibilities { get; set; }
+        public string? Responsibilities { get; set; }
 
         [StringLength(1000)]
-        public string Achievements { get; set; }
+        public string? Achievements { get; set; }
     }
 }

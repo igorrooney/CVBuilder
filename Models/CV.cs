@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,8 +10,9 @@ namespace CVBuilder.Models
         [Key]
         public int Id { get; set; }
 
-        public string UserId { get; set; }
-        public ApplicationUser User { get; set; }
+        [BindProperty]
+        public string UserId { get; set; } = string.Empty; // Ensure it's never null
+        public ApplicationUser? User { get; set; }
 
         // Personal Details
         [Required]
@@ -25,7 +27,7 @@ namespace CVBuilder.Models
         [Required, Phone]
         public string PhoneNumber { get; set; } 
 
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         // Professional Summary
         [Required]
@@ -39,12 +41,12 @@ namespace CVBuilder.Models
         public List<Education> Educations { get; set; } = new List<Education>();
 
         // Skills
-        public string Skills { get; set; }
+        public string? Skills { get; set; }
 
         // Certifications
         public List<Certification> Certifications { get; set; } = new List<Certification>();
 
         // Hobbies
-        public string Hobbies { get; set; }
+        public string? Hobbies { get; set; }
     }
 }

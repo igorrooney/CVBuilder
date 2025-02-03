@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CVBuilder.Models
 {
@@ -10,6 +11,8 @@ namespace CVBuilder.Models
 
         [Required]
         public int CVId { get; set; }
+
+        [ForeignKey("CVId")]
         public CV? CV { get; set; }
 
         [Required]
