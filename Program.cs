@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Load configuration from appsettings.json and Secret Manager
 builder.Configuration.AddUserSecrets<Program>();
 
+builder.Services.AddTransient<PdfService>();
+
 // Configure Email Sender
 builder.Services.AddTransient<ICustomEmailSender, EmailSender>();
 

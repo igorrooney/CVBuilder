@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using CVBuilder.Models;
+using CVBuilder.Services;
 
 namespace CVBuilder.Controllers
 {
@@ -11,11 +12,13 @@ namespace CVBuilder.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly PdfService _pdfService;
 
-        public CVController(AppDbContext context, UserManager<ApplicationUser> userManager)
+        public CVController(AppDbContext context, UserManager<ApplicationUser> userManager, PdfService pdfService)
         {
             _context = context;
             _userManager = userManager;
+            _pdfService = pdfService;
         }
 
         // GET: CV/Index (Show all CVs for logged-in user)
@@ -192,6 +195,22 @@ namespace CVBuilder.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> DownloadPdf(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToPage("/Identity/Account/Login");
+
+            var cv = await _context.CVs
+                .Include(c => c.WorkExperiences)
+                .Include(c => c.Educations)
+                .FirstOrDefaultAsync(c => c.Id == id && c.UserId == user.Id);
+
+            if (cv == null) return NotFound();
+
+            var pdfBytes = _pdfService.GenerateCvPdf(cv);
+            return File(pdfBytes, "application/pdf", "CV.pdf");
         }
     }
 }
