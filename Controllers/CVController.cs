@@ -40,9 +40,12 @@ namespace CVBuilder.Controllers
         }
 
         // GET: CV/Create
-        public IActionResult Create()
+        public async Task<IActionResult> CreateAsync()
         {
-            return View(new CV()); // Pass an empty CV model
+            var user = await _userManager.GetUserAsync(User);
+            ViewBag.User = user; // Send user details to the form
+
+            return View();
         }
 
         // POST: CV/Create
@@ -56,7 +59,6 @@ namespace CVBuilder.Controllers
                 return RedirectToPage("/Identity/Account/Login");
             }
 
-            // Assign UserId
             cv.UserId = user.Id;
             cv.User = user;
 

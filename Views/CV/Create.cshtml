@@ -5,25 +5,25 @@
 
 <h2>Create Your CV</h2>
 
-<form asp-action="Create" method="post">
+<form asp-controller="CV" asp-action="Create" method="post">
     <div class="form-group">
         <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control" value="@User.Identity.Name" />
+        <input asp-for="FirstName" class="form-control" value="@ViewBag.User?.FirstName" />
     </div>
 
     <div class="form-group">
         <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control" required />
+        <input asp-for="LastName" class="form-control" required value="@ViewBag.User?.LastName" />
     </div>
 
     <div class="form-group">
         <label asp-for="PhoneNumber"></label>
-        <input asp-for="PhoneNumber" class="form-control" required />
+        <input asp-for="PhoneNumber" class="form-control" required value="@ViewBag.User?.PhoneNumber" />
     </div>
 
     <div class="form-group">
         <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" required />
+        <input asp-for="Email" class="form-control" required value="@ViewBag.User?.Email" />
     </div>
 
     <div class="form-group">
