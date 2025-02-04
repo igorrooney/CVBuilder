@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CVBuilder.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250203140416_AddPersonalDetailsToCV")]
-    partial class AddPersonalDetailsToCV
+    [Migration("20250204145919_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace CVBuilder.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -40,6 +43,7 @@ namespace CVBuilder.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -112,7 +116,6 @@ namespace CVBuilder.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -124,7 +127,6 @@ namespace CVBuilder.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Hobbies")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
@@ -136,7 +138,6 @@ namespace CVBuilder.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Skills")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Summary")
@@ -222,7 +223,6 @@ namespace CVBuilder.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Achievements")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -241,7 +241,6 @@ namespace CVBuilder.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Responsibilities")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 

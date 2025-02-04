@@ -1,0 +1,12 @@
+﻿@model CVBuilder.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Your Profile";
+}
+
+<h2>Your Profile</h2>
+<p><strong>Full Name:</strong> @Model.FirstName @Model.LastName</p>
+<p><strong>Email:</strong> @Model.Email</p>
+<p><strong>Phone:</strong> @(Model.PhoneNumber ?? "Not Provided")</p>
+<p><strong>Address:</strong> @(Model.Address ?? "Not Provided")</p>
+
+<a href="@Url.Action("Edit", "Profile")" class="btn btn-primary">Edit Profile</a>

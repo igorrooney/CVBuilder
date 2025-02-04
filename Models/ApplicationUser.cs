@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CVBuilder.Models
 {
@@ -6,9 +7,18 @@ namespace CVBuilder.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string FullName { get; }
+
+        [NotMapped]
+        public string FullName => $"{FirstName} {LastName}";
         public string? ProfilePictureUrl { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public ICollection<CV> CVs { get; set; }
+
+        [NotMapped]
+        public ICollection<CV>? CVs { get; set; }
+
+
+        [ProtectedPersonalData]
+        public override string Email { get; set; }
+        public string? Address { get; set; }
     }
 }
