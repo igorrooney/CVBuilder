@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using CVBuilder.Models;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace CVBuilder.Controllers
 {
@@ -16,13 +17,13 @@ namespace CVBuilder.Controllers
             _userManager = userManager;
         }
 
-        // GET: Profile/View
+        // GET: Profile/ViewProfile
         public async Task<IActionResult> ViewProfile()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToPage("/Identity/Account/Login");
             }
             return View(user);
         }
@@ -33,9 +34,8 @@ namespace CVBuilder.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToPage("/Identity/Account/Login");
             }
-
             return View(user);
         }
 
@@ -44,18 +44,26 @@ namespace CVBuilder.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ApplicationUser model)
         {
+            var user = await _userManager.GetUserAsync(User);
+            Console.WriteLine($"user: {user}");
+            Console.WriteLine($"model: {model}");
+            if (user == null)
+            {
+                return RedirectToPage("/Identity/Account/Login");
+            }
+
+            // Ensure only the logged-in user can update their own profile
+            if (user.Id != model.Id)
+            {
+                return Forbid();
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            // Update user properties
+            // Update user details
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.PhoneNumber = model.PhoneNumber;
@@ -67,6 +75,7 @@ namespace CVBuilder.Controllers
                 return RedirectToAction("ViewProfile");
             }
 
+            // Log & display errors if update fails
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -74,7 +83,5 @@ namespace CVBuilder.Controllers
 
             return View(model);
         }
-
-
     }
 }

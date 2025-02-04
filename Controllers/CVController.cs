@@ -77,9 +77,7 @@ namespace CVBuilder.Controllers
 
             if (!ModelState.IsValid)
             {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                }
+
                 return View(cv);
             }
 
