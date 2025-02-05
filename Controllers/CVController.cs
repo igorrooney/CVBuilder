@@ -213,5 +213,28 @@ namespace CVBuilder.Controllers
 
             return File(pdfBytes, "application/pdf", $"{cv.FirstName}_{cv.LastName}_CV.pdf");
         }
+
+        // GET: CV/Details/{id}
+        public async Task<IActionResult> Details(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToPage("/Identity/Account/Login");
+            }
+
+            var cv = await _context.CVs
+                .Include(c => c.WorkExperiences)
+                .Include(c => c.Educations)
+                .FirstOrDefaultAsync(c => c.Id == id && c.UserId == user.Id);
+
+            if (cv == null)
+            {
+                return NotFound();
+            }
+
+            return View(cv);
+        }
+
     }
 }
