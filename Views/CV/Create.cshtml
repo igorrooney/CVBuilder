@@ -1,115 +1,117 @@
 ﻿@model CVBuilder.Models.CV
 @{
-    ViewData["Title"] = "Create CV";
+    ViewData["Title"] = Model?.Id == 0 ? "Create CV" : "Edit CV";
 }
 
-<h2 class="text-center mb-4">Create Your CV</h2>
+<h2 class="text-center mb-4">@((Model != null && Model.Id > 0) ? "Edit Your CV" : "Create Your CV")</h2>
 
 <style>
     body {
-        background-color: #f8f9fa;
+    background-color: #f8f9fa;
     }
 
     .form-container {
-        max-width: 800px;
-        margin: auto;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
     }
 
-        .form-group label {
-            font-weight: bold;
-        }
+    .form-group label {
+    font-weight: bold;
+    }
 
     .form-control {
-        border-radius: 5px;
-        border: 1px solid #ced4da;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
     }
 
-        .form-control:focus {
-            border-color: #0056b3;
-            box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
-        }
+    .form-control:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
+    }
 
     .btn-primary {
-        background-color: #0056b3;
-        color: white;
-        border: none;
+    background-color: #0056b3;
+    color: white;
+    border: none;
     }
 
     .btn-secondary {
-        background-color: #495057;
-        color: white;
-        border: none;
+    background-color: #495057;
+    color: white;
+    border: none;
     }
 
     .btn-icon {
-        background-color: transparent;
-        color: #495057;
-        border: none;
-        font-size: 1.2rem;
-        cursor: pointer;
+    background-color: transparent;
+    color: #495057;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
     }
 
-        .btn-icon:hover {
-            color: #0056b3;
-        }
+    .btn-icon:hover {
+    color: #0056b3;
+    }
 
     .section {
-        background: #ffffff;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-        margin-bottom: 15px;
-        position: relative;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    position: relative;
     }
 
     .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: bold;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
     }
 
     .checkbox-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     }
 </style>
 
 <div class="form-container">
-    <form asp-controller="CV" asp-action="Create" method="post" id="cvForm" novalidate>
+    <form asp-controller="CV" asp-action="@(Model != null && Model.Id > 0 ? "Edit" : "Create")" method="post" asp-route-id="@(Model?.Id)" novalidate>
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="UserId" />
         <div class="form-group">
             <label asp-for="FirstName"></label>
-            <input asp-for="FirstName" class="form-control" value="@ViewBag.User?.FirstName" required />
+            <input asp-for="FirstName" class="form-control" value="@Model?.FirstName" required />
             <span asp-validation-for="FirstName" class="text-danger d-none">This field is required</span>
         </div>
 
         <div class="form-group">
             <label asp-for="LastName"></label>
-            <input asp-for="LastName" class="form-control" value="@ViewBag.User?.LastName" required />
+            <input asp-for="LastName" class="form-control" value="@Model?.LastName" required />
             <span asp-validation-for="LastName" class="text-danger d-none">This field is required</span>
         </div>
 
         <div class="form-group">
             <label asp-for="PhoneNumber"></label>
-            <input asp-for="PhoneNumber" class="form-control" value="@ViewBag.User?.PhoneNumber" required />
+            <input asp-for="PhoneNumber" class="form-control" value="@Model?.PhoneNumber" required />
             <span asp-validation-for="PhoneNumber" class="text-danger d-none">This field is required</span>
         </div>
 
         <div class="form-group">
             <label asp-for="Email"></label>
-            <input asp-for="Email" class="form-control" value="@ViewBag.User?.Email" required />
+            <input asp-for="Email" class="form-control" value="@Model?.Email" required />
             <span asp-validation-for="Email" class="text-danger d-none">This field is required</span>
         </div>
 
@@ -124,72 +126,169 @@
         <!-- Work Experience Section -->
         <h3>Work Experience</h3>
         <div id="work-experience-container">
-            <div class="section">
-                <div class="form-group">
-                    <label>Job Title</label>
-                    <input name="WorkExperiences[0].JobTitle" class="form-control" required />
-                    <span class="text-danger d-none">This field is required</span>
+            @if (Model?.WorkExperiences != null && Model.WorkExperiences.Any())
+            {
+                @for (int i = 0; i < Model.WorkExperiences.Count; i++)
+                {
+                    <div class="section work-section">
+                        <div class="section-header">
+                            <span>Work Experience</span>
+                            @if (Model?.WorkExperiences != null && Model.WorkExperiences.Count > 1)
+                            {
+                                <button type="button" class="btn-icon remove-section"><i class="fas fa-trash"></i></button>
+                            }
+                        </div>
+                        <div class="form-group">
+                            <label>Job Title</label>
+                            <input name="WorkExperiences[@i].JobTitle" class="form-control" value="@Model.WorkExperiences[i].JobTitle" required />
+                            <span class="text-danger d-none">This field is required</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Company</label>
+                            <input name="WorkExperiences[@i].Company" class="form-control" value="@Model.WorkExperiences[i].Company" required />
+                            <span class="text-danger d-none">This field is required</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" name="WorkExperiences[@i].StartDate" class="form-control" value="@Model.WorkExperiences[i].StartDate.ToString("yyyy-MM-dd")" required />
+                            <span class="text-danger d-none">Please select a valid start date</span>
+                        </div>
+                        <div class="form-group checkbox-container">
+                            <input type="checkbox" id="stillWorking_@i" class="still-working-checkbox" @(Model.WorkExperiences[i].EndDate == null ? "checked" : "") />
+                            <label for="stillWorking_@i">Still working here</label>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="date" name="WorkExperiences[@i].EndDate" class="form-control end-date"
+                            value="@(Model.WorkExperiences[i].EndDate.HasValue ? Model.WorkExperiences[i].EndDate.Value.ToString("yyyy-MM-dd") : "")"
+                            @(Model.WorkExperiences[i].EndDate == null ? "disabled" : "") />
+                            <span class="text-danger d-none">This field is required</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Responsibilities</label>
+                            <textarea name="WorkExperiences[@i].Responsibilities" class="form-control" required>@Model.WorkExperiences[i].Responsibilities</textarea>
+                            <span class="text-danger d-none">This field is required</span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Ensure one empty Work Experience section is visible when creating -->
+                <div class="section">
+                    <div class="form-group">
+                        <label>Job Title</label>
+                        <input name="WorkExperiences[0].JobTitle" class="form-control" required />
+                        <span class="text-danger d-none">This field is required</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input name="WorkExperiences[0].Company" class="form-control" required />
+                        <span class="text-danger d-none">This field is required</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" name="WorkExperiences[0].StartDate" class="form-control" required />
+                        <span class="text-danger d-none">Please select a valid start date</span>
+                    </div>
+                    <div class="form-group checkbox-container">
+                        <input type="checkbox" id="stillWorking_0" class="still-working-checkbox" />
+                        <label for="stillWorking_0">Still working here</label>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" name="WorkExperiences[0].EndDate" class="form-control end-date" required />
+                        <span class="text-danger d-none">This field is required</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Responsibilities</label>
+                        <textarea name="WorkExperiences[0].Responsibilities" class="form-control" required></textarea>
+                        <span class="text-danger d-none">This field is required</span>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Company</label>
-                    <input name="WorkExperiences[0].Company" class="form-control" required />
-                    <span class="text-danger d-none">This field is required</span>
-                </div>
-                <div class="form-group">
-                    <label>Start Date</label>
-                    <input type="date" name="WorkExperiences[0].StartDate" class="form-control" required />
-                    <span class="text-danger d-none">Please select a valid start date</span>
-                </div>
-                <div class="form-group checkbox-container">
-                    <input type="checkbox" id="stillWorking0" class="still-working-checkbox" />
-                    <label for="stillWorking0">Still working here</label>
-                </div>
-                <div class="form-group">
-                    <label>End Date</label>
-                    <input type="date" name="WorkExperiences[0].EndDate" class="form-control end-date" required />
-                    <span class="text-danger d-none">This field is required</span>
-                </div>
-                <div class="form-group">
-                    <label>Responsibilities</label>
-                    <textarea name="WorkExperiences[0].Responsibilities" class="form-control" required></textarea>
-                    <span class="text-danger d-none">This field is required</span>
-                </div>
-            </div>
+            }
         </div>
+
         <button type="button" id="add-work-experience" class="btn btn-secondary">Add More Work Experience</button>
+
 
         <hr />
 
         <!-- Education Section -->
         <h3>Education</h3>
         <div id="education-container">
-            <div class="section">
-                <div class="form-group">
-                    <label>Degree</label>
-                    <input name="Educations[0].Degree" class="form-control" required />
-                    <span class="text-danger d-none">This field is required</span>
+            @if (Model?.Educations != null && Model.Educations.Any())
+            {
+                @for (int i = 0; i < Model.Educations.Count; i++)
+                {
+                    <div class="section">
+                        <div class="section-header">
+                            <span>Education</span>
+                               @if (Model.Educations.Count > 1)
+                                {
+                                    <button type="button" class="btn-icon remove-section"><i class="fas fa-trash"></i></button>
+                                }
+                        </div>
+                        <div class="form-group">
+                            <label>Degree</label>
+                            <input name="Educations[@i].Degree" value="@Model.Educations[i].Degree" class="form-control" required />
+                            <span class="text-danger d-none">This field is required</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Institution</label>
+                            <input name="Educations[@i].Institution" value="@Model.Educations[i].Institution" class="form-control" required />
+                            <span class="text-danger d-none">This field is required</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Graduation Year</label>
+                            <input type="number" name="Educations[@i].GraduationYear" value="@Model.Educations[i].GraduationYear" class="form-control" required />
+                            <span class="text-danger d-none">This field is required</span>
+                        </div>
+                    </div>
+                }
+
+            } else
+            {
+                <div class="section">
+                    <div class="form-group">
+                        <label>Degree</label>
+                        <input name="Educations[0].Degree" class="form-control" required />
+                        <span class="text-danger d-none">This field is required</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input name="Educations[0].Institution" class="form-control" required />
+                        <span class="text-danger d-none">This field is required</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Graduation Year</label>
+                        <input type="number" name="Educations[0].GraduationYear" class="form-control" required />
+                        <span class="text-danger d-none">This field is required</span>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Institution</label>
-                    <input name="Educations[0].Institution" class="form-control" required />
-                    <span class="text-danger d-none">This field is required</span>
-                </div>
-                <div class="form-group">
-                    <label>Graduation Year</label>
-                    <input type="number" name="Educations[0].GraduationYear" class="form-control" required />
-                    <span class="text-danger d-none">This field is required</span>
-                </div>
-            </div>
+            }
         </div>
         <button type="button" id="add-education" class="btn btn-secondary">Add More Education</button>
 
         <hr />
 
-        <button type="submit" class="btn btn-primary">Save CV</button>
+        <div class="btn-container">
+            <a href="@Url.Action("Index", "CV")" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">@((Model != null && Model.Id > 0) ? "Save Changes" : "Create CV")</button>
+        </div>
     </form>
 </div>
 
 <script>
+    document.addEventListener('change', function(event) {
+        if (event.target.classList.contains('still-working-checkbox')) {
+            let endDateField = event.target.closest('.section').querySelector('.end-date');
+            if(endDateField) {
+                endDateField.disabled = event.target.checked;
+            }
+        }
+    });
+
     function addSection(containerId, title, template) {
         let container = document.getElementById(containerId);
         let index = container.querySelectorAll('.section').length;
@@ -289,12 +388,4 @@
         });
     });
 
-    document.addEventListener('change', function(event) {
-        if (event.target.classList.contains('still-working-checkbox')) {
-            let endDateField = event.target.closest('.section').querySelector('.end-date');
-            if(endDateField) {
-                endDateField.disabled = event.target.checked;
-            }
-        }
-    });
 </script>

@@ -39,19 +39,8 @@ namespace CVBuilder.Controllers
             return View(cvs);
         }
 
-        // GET: CV/Create
-        public async Task<IActionResult> CreateAsync()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            ViewBag.User = user; // Send user details to the form
-
-            return View();
-        }
-
-        // POST: CV/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CV cv)
+        // GET: CV/Create (For creating a new CV)
+        public async Task<IActionResult> Create()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -59,37 +48,18 @@ namespace CVBuilder.Controllers
                 return RedirectToPage("/Identity/Account/Login");
             }
 
-            cv.UserId = user.Id;
-            cv.User = user;
-
-            // Ensure Educations are added explicitly
-            if (cv.Educations != null)
+            var cv = new CV
             {
-                foreach (var edu in cv.Educations)
-                {
-                    edu.CVId = cv.Id;  // Ensure foreign key assignment
-                    _context.Educations.Add(edu);
-                }
-            }
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
+            };
 
-            ModelState.Remove("UserId");
-            ModelState.Remove("User");
-
-            if (!ModelState.IsValid)
-            {
-
-                return View(cv);
-            }
-
-            _context.CVs.Add(cv);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+            return View("Create", cv); // Pass a new CV instance with user data
         }
 
-
-
-        // GET: CV/Edit/{id}
+        // GET: CV/Edit/{id} (For editing an existing CV)
         public async Task<IActionResult> Edit(int id)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -108,8 +78,44 @@ namespace CVBuilder.Controllers
                 return NotFound();
             }
 
-            return View(cv);
+            ViewBag.User = user;
+            return View("Create", cv); // Reuse the Create.cshtml for editing
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CV cv)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToPage("/Identity/Account/Login");
+            }
+
+            // Assign UserId before validation
+            cv.UserId = user.Id;
+
+            // Log for debugging
+            Console.WriteLine($"Assigning UserId: {cv.UserId}");
+
+            // Remove model state errors related to UserId
+            ModelState.Remove("UserId");
+
+            if (!ModelState.IsValid)
+            {
+                foreach (var error in ModelState)
+                {
+                    Console.WriteLine($"Field: {error.Key}, Errors: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+                }
+                return View("Create", cv);
+            }
+
+            _context.CVs.Add(cv);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
 
         // POST: CV/Edit/{id}
         [HttpPost]
@@ -118,7 +124,7 @@ namespace CVBuilder.Controllers
         {
             if (id != cv.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             var user = await _userManager.GetUserAsync(User);
@@ -127,23 +133,52 @@ namespace CVBuilder.Controllers
                 return Forbid();
             }
 
-            if (ModelState.IsValid)
+            var existingCv = await _context.CVs
+                .Include(c => c.WorkExperiences)
+                .Include(c => c.Educations)
+                .FirstOrDefaultAsync(c => c.Id == id && c.UserId == user.Id);
+
+            if (existingCv == null)
             {
-                try
-                {
-                    _context.Update(cv);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error updating CV: {ex.Message}");
-                    ModelState.AddModelError("", "An error occurred while updating the CV. Please try again.");
-                }
+                return NotFound();
             }
 
-            return View(cv);
+            if (!ModelState.IsValid)
+            {
+                return View("Create", cv);
+            }
+
+            try
+            {
+                // Clear existing Work Experiences and Educations before updating
+                _context.WorkExperiences.RemoveRange(existingCv.WorkExperiences);
+                _context.Educations.RemoveRange(existingCv.Educations);
+                await _context.SaveChangesAsync(); // Commit removal before adding new ones
+
+                // Update CV fields
+                existingCv.FirstName = cv.FirstName;
+                existingCv.LastName = cv.LastName;
+                existingCv.PhoneNumber = cv.PhoneNumber;
+                existingCv.Email = cv.Email;
+                existingCv.Summary = cv.Summary;
+                existingCv.WorkExperiences = cv.WorkExperiences ?? new List<WorkExperience>();
+                existingCv.Educations = cv.Educations ?? new List<Education>();
+
+                _context.Update(existingCv);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating CV: {ex.Message}");
+                ModelState.AddModelError("", "An error occurred while updating the CV. Please try again.");
+                return View("Create", cv);
+            }
+
+            return RedirectToAction(nameof(Index));
         }
+
+
+
 
         // GET: CV/Delete/{id}
         public async Task<IActionResult> Delete(int id)
@@ -197,23 +232,6 @@ namespace CVBuilder.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> DownloadPdf(int id)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToPage("/Identity/Account/Login");
-
-            var cv = await _context.CVs
-                .Include(c => c.WorkExperiences)
-                .Include(c => c.Educations)
-                .FirstOrDefaultAsync(c => c.Id == id && c.UserId == user.Id);
-
-            if (cv == null) return NotFound();
-
-            var pdfBytes = _pdfService.GenerateCvPdf(cv);
-
-            return File(pdfBytes, "application/pdf", $"{cv.FirstName}_{cv.LastName}_CV.pdf");
-        }
-
         // GET: CV/Details/{id}
         public async Task<IActionResult> Details(int id)
         {
@@ -236,5 +254,21 @@ namespace CVBuilder.Controllers
             return View(cv);
         }
 
+        public async Task<IActionResult> DownloadPdf(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToPage("/Identity/Account/Login");
+
+            var cv = await _context.CVs
+                .Include(c => c.WorkExperiences)
+                .Include(c => c.Educations)
+                .FirstOrDefaultAsync(c => c.Id == id && c.UserId == user.Id);
+
+            if (cv == null) return NotFound();
+
+            var pdfBytes = _pdfService.GenerateCvPdf(cv);
+
+            return File(pdfBytes, "application/pdf", $"{cv.FirstName}_{cv.LastName}_CV.pdf");
+        }
     }
 }

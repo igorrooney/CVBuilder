@@ -45,8 +45,6 @@ namespace CVBuilder.Controllers
         public async Task<IActionResult> Edit(ApplicationUser model)
         {
             var user = await _userManager.GetUserAsync(User);
-            Console.WriteLine($"user: {user}");
-            Console.WriteLine($"model: {model}");
             if (user == null)
             {
                 return RedirectToPage("/Identity/Account/Login");
