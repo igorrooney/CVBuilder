@@ -5,28 +5,93 @@
 
 <h2>Edit Profile</h2>
 
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: Arial, sans-serif;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: #343a40;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 1rem;
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        background-color: white;
+        color: #495057;
+    }
+    .btn-container {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+    }
+    .btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 1rem;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+    .btn-primary {
+        background-color: #0056b3;
+        color: white;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #004494;
+    }
+    .btn-secondary {
+        background-color: #495057;
+        color: white;
+        border: none;
+    }
+    .btn-secondary:hover {
+        background-color: #343a40;
+    }
+</style>
+
 <form id="editProfileForm" asp-controller="Profile" asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
+    
     <div class="form-group">
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control"/>
+        <label asp-for="FirstName">First Name</label>
+        <input asp-for="FirstName" class="form-control" required />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control"/>
+        <label asp-for="LastName">Last Name</label>
+        <input asp-for="LastName" class="form-control" required />
+        <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" readonly/>
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" class="form-control" disabled />
     </div>
+
     <div class="form-group">
-        <label asp-for="PhoneNumber"></label>
-        <input asp-for="PhoneNumber" class="form-control"/>
+        <label asp-for="PhoneNumber">Phone Number</label>
+        <input asp-for="PhoneNumber" class="form-control" required />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="Address"></label>
-        <input asp-for="Address" class="form-control"/>
+        <label asp-for="Address">Address</label>
+        <input asp-for="Address" class="form-control" required />
+        <span asp-validation-for="Address" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-success">Save Changes</button>
-    <a href="@Url.Action("ViewProfile")" class="btn btn-secondary">Cancel</a>
+
+    <div class="btn-container">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="@Url.Action("ViewProfile")" class="btn btn-secondary">Cancel</a>
+    </div>
 </form>
