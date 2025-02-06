@@ -63,9 +63,11 @@ namespace CVBuilder.Controllers
             };
 
             ViewData["Breadcrumbs"] = new List<(string title, string url)>
-        {
-            ("Your CVs", Url.Action("Index", "CV")),
-        };
+            {
+                ("Home", Url.Action("Index", "Home")),
+                ("Your CVs", Url.Action("Index", "CV")),
+                ("Create Your CV", ""),
+            };
 
             return View("Create", cv); // Pass a new CV instance with user data
         }
