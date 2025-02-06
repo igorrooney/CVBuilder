@@ -1,8 +1,46 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5 text-center">
+    <h1 class="display-4">Welcome to CV Builder</h1>
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <p class="lead">Manage your CVs and boost your job applications with ease.</p>
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item active" aria-current="page">Home</li>
+            </ol>
+        </nav>
+
+        <div class="card mx-auto shadow-lg border-0" style="max-width: 600px; background-color: #f8f9fa;">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Your CV Dashboard</h5>
+                <p class="card-text text-secondary">
+                    Create, edit, and download your CVs in a few clicks.
+                </p>
+                <a href="@Url.Action("Index", "CV")" class="btn btn-primary">Manage Your CVs</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p class="lead">Easily create and manage your CVs with our intuitive tool.</p>
+
+        <div class="card mx-auto shadow-lg border-0" style="max-width: 600px; background-color: #ffffff;">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Get Started</h5>
+                <p class="card-text text-secondary">
+                    Sign up for free and start building your CV in minutes.
+                </p>
+                <a href="@Url.Page("/Account/Register", new { area = "Identity" })" class="btn btn-primary">Sign Up</a>
+                <a href="@Url.Page("/Account/Login", new { area = "Identity" })" class="btn btn-secondary">Login</a>
+            </div>
+        </div>
+    }
 </div>

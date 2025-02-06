@@ -53,8 +53,36 @@
             </div>
         </nav>
     </header>
+
     <div class="container">
+
+
+
+
         <main role="main" class="pb-3">
+            <!-- Breadcrumbs -->
+            @if (ViewData["Breadcrumbs"] is List<(string title, string url)> breadcrumbs && breadcrumbs.Any())
+            {
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        @for (int i = 0; i < breadcrumbs.Count; i++)
+                        {
+                            if (i == breadcrumbs.Count - 1)
+                            {
+                                <!-- Last item (no link) -->
+                                <li class="breadcrumb-item active">@breadcrumbs[i].title</li>
+                            }
+                            else
+                            {
+                                <li class="breadcrumb-item">
+                                    <a href="@breadcrumbs[i].url">@breadcrumbs[i].title</a>
+                                </li>
+                            }
+                        }
+                    </ol>
+                </nav>
+            }
+
             @RenderBody()
         </main>
     </div>
@@ -64,10 +92,10 @@
             &copy; 2025 - CVBuilder - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 

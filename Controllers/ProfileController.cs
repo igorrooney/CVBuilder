@@ -25,6 +25,13 @@ namespace CVBuilder.Controllers
             {
                 return RedirectToPage("/Identity/Account/Login");
             }
+
+            ViewData["Breadcrumbs"] = new List<(string title, string url)>
+            {
+                ("Home", Url.Action("Index", "Home")),
+                ("Your Profile", ""),
+            };
+
             return View(user);
         }
 
@@ -36,6 +43,13 @@ namespace CVBuilder.Controllers
             {
                 return RedirectToPage("/Identity/Account/Login");
             }
+
+            ViewData["Breadcrumbs"] = new List<(string title, string url)>
+            {
+                ("Home", Url.Action("Index", "Home")),
+                ("Your Profile", Url.Action("ViewProfile", "Profile")),
+                ("Edit Profile", ""),
+            };
             return View(user);
         }
 

@@ -36,6 +36,12 @@ namespace CVBuilder.Controllers
                 .Include(c => c.Educations)
                 .ToListAsync(); // Use async database call
 
+            ViewData["Breadcrumbs"] = new List<(string title, string url)>
+            {
+                ("Home", Url.Action("Index", "Home")),
+                ("Your CVs", ""),
+            };
+
             return View(cvs);
         }
 
@@ -55,6 +61,11 @@ namespace CVBuilder.Controllers
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber
             };
+
+            ViewData["Breadcrumbs"] = new List<(string title, string url)>
+        {
+            ("Your CVs", Url.Action("Index", "CV")),
+        };
 
             return View("Create", cv); // Pass a new CV instance with user data
         }
@@ -79,6 +90,14 @@ namespace CVBuilder.Controllers
             }
 
             ViewBag.User = user;
+
+            ViewData["Breadcrumbs"] = new List<(string title, string url)>
+            {
+                ("Home", Url.Action("Index", "Home")),
+                ("Your CVs", Url.Action("Index", "CV")),
+                ("Edit Your CV", ""),
+            };
+
             return View("Create", cv); // Reuse the Create.cshtml for editing
         }
 
@@ -197,6 +216,13 @@ namespace CVBuilder.Controllers
                 return NotFound();
             }
 
+            ViewData["Breadcrumbs"] = new List<(string title, string url)>
+            {
+                ("Home", Url.Action("Index", "Home")),
+                ("Your CVs", Url.Action("Index", "CV")),
+                ("Delete CV", ""),
+            };
+
             return View(cv);
         }
 
@@ -250,6 +276,13 @@ namespace CVBuilder.Controllers
             {
                 return NotFound();
             }
+
+            ViewData["Breadcrumbs"] = new List<(string title, string url)>
+            {
+                ("Home", Url.Action("Index", "Home")),
+                ("Your CVs", Url.Action("Index", "CV")),
+                ("CV Details", ""),
+            };
 
             return View(cv);
         }
