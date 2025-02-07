@@ -1,0 +1,120 @@
+﻿@model IEnumerable<CVBuilder.Models.CV>
+
+@{
+    ViewData["Title"] = "Your CVs";
+}
+
+<h2 class="text-center mb-4">Your CVs</h2>
+
+<style>
+    .table-container {
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+    .btn-container {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-view {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-edit {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-download {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+    }
+</style>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cv in Model)
+            {
+                <tr>
+                    <td>@cv.FirstName @cv.LastName</td>
+                    <td>@cv.Email</td>
+                    <td>@cv.PhoneNumber</td>
+                    <td class="btn-container">
+                        <a asp-action="Details" asp-route-id="@cv.Id" class="btn btn-view">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@cv.Id" class="btn btn-edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@cv.Id" class="btn btn-delete">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                        <a asp-action="DownloadPdf" asp-route-id="@cv.Id" class="btn btn-download">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="text-center mt-3">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New CV
+        </a>
+    </div>
+</div>
+
