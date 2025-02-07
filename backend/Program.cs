@@ -23,8 +23,22 @@ builder.Services.AddTransient<ICustomEmailSender, EmailSender>();
 builder.Services.AddControllersWithViews();
 
 // Configure Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")));
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING");
+
+if (!string.IsNullOrEmpty(databaseUrl))
+{
+    var databaseUri = new Uri(databaseUrl);
+    var userInfo = databaseUri.UserInfo.Split(':');
+
+    var connectionString = $"Host={databaseUri.Host};Port={databaseUri.Port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+else
+{
+    throw new InvalidOperationException("DATABASE_CONNECTION_STRING is not set.");
+}
 
 // Configure Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
