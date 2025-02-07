@@ -22,23 +22,21 @@ builder.Services.AddTransient<ICustomEmailSender, EmailSender>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configure Database
+// Configure Database (Render uses environment variables)
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING");
 
-if (!string.IsNullOrEmpty(databaseUrl))
-{
-    var databaseUri = new Uri(databaseUrl);
-    var userInfo = databaseUri.UserInfo.Split(':');
+Console.WriteLine($"🔍 DATABASE_CONNECTION_STRING: {databaseUrl}");
 
-    var connectionString = $"Host={databaseUri.Host};Port={databaseUri.Port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
-
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(connectionString));
-}
-else
+if (string.IsNullOrEmpty(databaseUrl))
 {
-    throw new InvalidOperationException("DATABASE_CONNECTION_STRING is not set.");
+    throw new InvalidOperationException("❌ DATABASE_CONNECTION_STRING is not set.");
 }
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(databaseUrl));
+
+
+Console.WriteLine($"🔍 DATABASE_CONNECTION_STRING: {databaseUrl}");
 
 // Configure Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -104,7 +102,5 @@ app.MapRazorPages(); // Required for Identity Razor Pages
 
 app.MapControllers();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";  // Render uses PORT variable
-app.Urls.Add($"http://*:{port}");
 
 app.Run();
