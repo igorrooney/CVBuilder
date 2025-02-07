@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace CVBuilder.Models
 {
@@ -23,6 +24,7 @@ namespace CVBuilder.Models
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
 
+        [JsonIgnore]  // ✅ This prevents circular reference issues
         public virtual ICollection<CV>? CVs { get; set; } = new List<CV>();
 
         [ProtectedPersonalData]

@@ -1,15 +1,20 @@
-using CVBuilder.Models;
+﻿using CVBuilder.Models;
 using CVBuilder.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
 
 // Load configuration from appsettings.json and Secret Manager
 builder.Configuration.AddUserSecrets<Program>();
 
 builder.Services.AddTransient<PdfService>();
+
+builder.Services.AddSwaggerGen();
 
 // Configure Email Sender
 builder.Services.AddTransient<ICustomEmailSender, EmailSender>();
@@ -28,16 +33,27 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 })
 .AddEntityFrameworkStores<AppDbContext>();
 
-// Configure CORS (if needed later for API)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000") // ✅ Change to your frontend URL
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+});
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.WriteIndented = true;
 });
 
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 // Apply database migrations on startup
 using (var scope = app.Services.CreateScope())
@@ -48,22 +64,20 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())  // Ensure Swagger runs in dev & staging
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-else
-{
-    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "CV Builder API v1");
+        c.RoutePrefix = "swagger";
+    });
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.UseCors("AllowAll"); // Apply CORS policy if needed
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -73,5 +87,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages(); // Required for Identity Razor Pages
+
+app.MapControllers();
 
 app.Run();

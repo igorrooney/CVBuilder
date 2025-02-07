@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using CVBuilder.Models;
 using System.Threading.Tasks;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace CVBuilder.Controllers
 {
-    [Authorize] // Ensure only logged-in users can access
-    public class ProfileController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize] // Ensure authentication is required
+    public class ProfileController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -17,62 +19,49 @@ namespace CVBuilder.Controllers
             _userManager = userManager;
         }
 
-        // GET: Profile/ViewProfile
+        // GET: api/Profile/ViewProfile
+        [HttpGet("ViewProfile")]
         public async Task<IActionResult> ViewProfile()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Identity/Account/Login");
+                return Unauthorized("User not found. Please log in.");
             }
 
-            ViewData["Breadcrumbs"] = new List<(string title, string url)>
-            {
-                ("Home", Url.Action("Index", "Home")),
-                ("Your Profile", ""),
-            };
-
-            return View(user);
+            return Ok(user);
         }
 
-        // GET: Profile/Edit
+        // GET: api/Profile/Edit
+        [HttpGet("Edit")]
         public async Task<IActionResult> Edit()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Identity/Account/Login");
+                return Unauthorized("User not found. Please log in.");
             }
-
-            ViewData["Breadcrumbs"] = new List<(string title, string url)>
-            {
-                ("Home", Url.Action("Index", "Home")),
-                ("Your Profile", Url.Action("ViewProfile", "Profile")),
-                ("Edit Profile", ""),
-            };
-            return View(user);
+            return Ok(user);
         }
 
-        // POST: Profile/Edit
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ApplicationUser model)
+        // POST: api/Profile/Edit
+        [HttpPost("Edit")]
+        public async Task<IActionResult> Edit([FromBody] ApplicationUser model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToPage("/Identity/Account/Login");
+                return Unauthorized("User not found. Please log in.");
             }
 
-            // Ensure only the logged-in user can update their own profile
             if (user.Id != model.Id)
             {
                 return Forbid();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return View(model);
             }
 
             // Update user details
@@ -84,16 +73,10 @@ namespace CVBuilder.Controllers
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                return RedirectToAction("ViewProfile");
+                return Ok(new { message = "Profile updated successfully." });
             }
 
-            // Log & display errors if update fails
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            return View(model);
+            return BadRequest(result.Errors);
         }
     }
 }
