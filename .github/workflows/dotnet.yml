@@ -21,10 +21,13 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: backend  # Navigate to backend folder
 
     - name: Build
       run: dotnet build --no-restore --configuration Release
+      working-directory: backend  # Navigate to backend folder
 
-    # Optional: Run tests (add when you have tests)
-    # - name: Test
-    #   run: dotnet test --no-build --verbosity normal
+    # Optional: Run tests (if applicable)
+    #- name: Test
+    #  run: dotnet test --no-build --verbosity normal
+    #  working-directory: backend  # Navigate to backend folder
