@@ -6,17 +6,15 @@
 }
 
 <div class="container mt-5 text-center">
-    <h1 class="display-4">Welcome to CV Builder</h1>
+    <div class="hero-section">
+        <h1>Build a Perfect British CV That Gets You Hired!</h1>
+        <p>Follow UK hiring standards with expert-approved templates.</p>
+        <a href="@Url.Action("Create", "CV")" class="cta-btn">Start Your British CV</a>
+    </div>
 
     @if (SignInManager.IsSignedIn(User))
     {
         <p class="lead">Manage your CVs and boost your job applications with ease.</p>
-
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb justify-content-center">
-                <li class="breadcrumb-item active" aria-current="page">Home</li>
-            </ol>
-        </nav>
 
         <div class="card mx-auto shadow-lg border-0" style="max-width: 600px; background-color: #f8f9fa;">
             <div class="card-body">
@@ -30,17 +28,115 @@
     }
     else
     {
-        <p class="lead">Easily create and manage your CVs with our intuitive tool.</p>
-
-        <div class="card mx-auto shadow-lg border-0" style="max-width: 600px; background-color: #ffffff;">
-            <div class="card-body">
-                <h5 class="card-title text-primary">Get Started</h5>
-                <p class="card-text text-secondary">
-                    Sign up for free and start building your CV in minutes.
-                </p>
-                <a href="@Url.Page("/Account/Register", new { area = "Identity" })" class="btn btn-primary">Sign Up</a>
-                <a href="@Url.Page("/Account/Login", new { area = "Identity" })" class="btn btn-secondary">Login</a>
+        <h2 class="text-center mt-5">Why a British CV?</h2>
+        <div class="comparison-section">
+            <div class="comparison-box">
+                <h4>UK CV</h4>
+                <ul>
+                    <li><i class="fa-solid fa-check text-success"></i> No Photos</li>
+                    <li><i class="fa-solid fa-check text-success"></i> Professional Summary First</li>
+                    <li><i class="fa-solid fa-check text-success"></i> 2-Page Max Rule</li>
+                    <li><i class="fa-solid fa-check text-success"></i> ATS-Compatible Formatting</li>
+                </ul>
+            </div>
+            <div class="comparison-box">
+                <h4>Generic CV</h4>
+                <ul>
+                    <li><i class="fa-solid fa-x text-danger"></i> Photo Included</li>
+                    <li><i class="fa-solid fa-x text-danger"></i> Unstructured Layout</li>
+                    <li><i class="fa-solid fa-x text-danger"></i> No Defined Length</li>
+                    <li><i class="fa-solid fa-x text-danger"></i> Hard to Scan by ATS</li>
+                </ul>
             </div>
         </div>
+
+        <h2 class="text-center mt-5">Compare Plans</h2>
+        <table class="table table-striped pricing-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Free</th>
+                    <th>Premium</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Basic CV Templates</td>
+                    <td><i class="fa-solid fa-check text-success"></i></td>
+                    <td><i class="fa-solid fa-check text-success"></i></td>
+                </tr>
+                <tr>
+                    <td>AI-Powered CV Suggestions</td>
+                    <td><i class="fa-solid fa-x text-danger"></i></td>
+                    <td><i class="fa-solid fa-check text-success"></i></td>
+                </tr>
+                <tr>
+                    <td>Download as PDF</td>
+                    <td><i class="fa-solid fa-check text-success"></i></td>
+                    <td><i class="fa-solid fa-check text-success"></i></td>
+                </tr>
+                <tr>
+                    <td>Real-Time ATS Compatibility</td>
+                    <td><i class="fa-solid fa-x text-danger"></i></td>
+                    <td><i class="fa-solid fa-check text-success"></i></td>
+                </tr>
+                <tr>
+                    <td>AI-Powered Cover Letter</td>
+                    <td><i class="fa-solid fa-x text-danger"></i></td>
+                    <td><i class="fa-solid fa-check text-success"></i></td>
+                </tr>
+            </tbody>
+        </table>
     }
 </div>
+
+<style>
+    .hero-section {
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(to right, #0056b3, #003f7f);
+        color: white;
+        border-radius: 8px;
+        margin-bottom: 40px;
+    }
+    .cta-btn {
+        background: #f8f9fa;
+        color: #0056b3;
+        padding: 12px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    .cta-btn:hover {
+        background: #0056b3;
+        color: white;
+    }
+    .comparison-section {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+    }
+    .comparison-box {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        width: 300px;
+        text-align: center;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .comparison-box ul {
+        list-style: none;
+        padding: 0;
+    }
+    .comparison-box li {
+        padding: 5px 0;
+    }
+    .pricing-table {
+        margin-top: 40px;
+    }
+    .pricing-table th, .pricing-table td {
+        text-align: center;
+        padding: 15px;
+        border: 1px solid #ddd;
+    }
+</style>
