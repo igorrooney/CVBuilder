@@ -1,0 +1,90 @@
+﻿@model CVBuilder.Models.CV
+@{
+    ViewData["Title"] = "View CV";
+}
+
+<h2 class="text-center mb-4">CV Details</h2>
+
+<div class="form-container">
+    <!-- Personal Details -->
+    <div class="section">
+        <h4>Personal Information</h4>
+        <p><strong>Full Name:</strong> @Model.FirstName @Model.LastName</p>
+        <p><strong>Email:</strong> @Model.Email</p>
+        <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+        <p><strong>Summary:</strong> @Model.Summary</p>
+    </div>
+
+    <!-- Work Experience -->
+    <div class="section">
+        <h4>Work Experience</h4>
+        @if (Model.WorkExperiences.Any())
+        {
+            @foreach (var experience in Model.WorkExperiences)
+            {
+                <div class="experience">
+                    <p><strong>Job Title:</strong> @experience.JobTitle</p>
+                    <p><strong>Company:</strong> @experience.Company</p>
+                    <p>
+                        <strong>Duration:</strong> @experience.StartDate.ToString("MMMM yyyy") -
+                        @(experience.EndDate.HasValue ? experience.EndDate.Value.ToString("MMMM yyyy") : "Present")
+                    </p>
+                    <p><strong>Responsibilities:</strong> @experience.Responsibilities</p>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No work experience added.</p>
+        }
+    </div>
+
+    <!-- Education -->
+    <div class="section">
+        <h4>Education</h4>
+        @if (Model.Educations.Any())
+        {
+            @foreach (var education in Model.Educations)
+            {
+                <div class="education">
+                    <p><strong>Degree:</strong> @education.Degree</p>
+                    <p><strong>Institution:</strong> @education.Institution</p>
+                    <p><strong>Graduation Year:</strong> @education.GraduationYear</p>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No education details added.</p>
+        }
+    </div>
+
+    <!-- Actions -->
+    <div class="btn-container">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit CV</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+    }
+</style>

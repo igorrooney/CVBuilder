@@ -1,0 +1,171 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CVBuilder</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/CVBuilder.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Navigation Bar Enhancements */
+        .navbar {
+            background-color: white;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #0056b3;
+            transition: color 0.3s ease-in-out;
+        }
+
+        /* Smooth fade-in for welcome message */
+        .welcome-section {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.6s ease-in-out forwards;
+        }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* Softened shadow effect */
+        .dashboard-card {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+            .dashboard-card:hover {
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            }
+
+        /* Adjust button color */
+        .btn-primary {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+            .btn-primary:hover {
+                background-color: #004494;
+                border-color: #004494;
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fa-solid fa-briefcase"></i> CVBuilder
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="cvDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-file-alt"></i> CVs
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="cvDropdown">
+                                <li><a class="dropdown-item" asp-area="" asp-controller="CV" asp-action="Index">Manage CVs</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="CV" asp-action="Create">Create New CV</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        @{
+                            var user = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
+                        }
+
+                        @if (user != null)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-user"></i> @user.FirstName (@user.Email)
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="@Url.Action("ViewProfile", "Profile")"><i class="fa-solid fa-user"></i> Profile</a></li>
+                                    <li>
+                                        <form method="post" asp-area="Identity" asp-page="/Account/Logout" id="logoutForm" novalidate>
+                                            <button type="submit" class="dropdown-item"><i class="fa-solid fa-sign-out-alt"></i> Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Login"><i class="fa-solid fa-sign-in-alt"></i> Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Register"><i class="fa-solid fa-user-plus"></i> Register</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            <!-- Breadcrumbs -->
+            @if (ViewData["Breadcrumbs"] is List<(string title, string url)> breadcrumbs && breadcrumbs.Any())
+            {
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        @for (int i = 0; i < breadcrumbs.Count; i++)
+                        {
+                            if (i == breadcrumbs.Count - 1)
+                            {
+                                <!-- Last item (no link) -->
+                                <li class="breadcrumb-item active">@breadcrumbs[i].title</li>
+                            }
+                            else
+                            {
+                                <li class="breadcrumb-item">
+                                    <a href="@breadcrumbs[i].url">@breadcrumbs[i].title</a>
+                                </li>
+                            }
+                        }
+                    </ol>
+                </nav>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - CVBuilder - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
