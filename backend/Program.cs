@@ -90,4 +90,7 @@ app.MapRazorPages(); // Required for Identity Razor Pages
 
 app.MapControllers();
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";  // Render uses PORT variable
+app.Urls.Add($"http://*:{port}");
+
 app.Run();
