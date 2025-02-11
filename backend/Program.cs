@@ -3,12 +3,18 @@ using CVBuilder.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+// Configure Kestrel to use a specific port dynamically
+var port = Environment.GetEnvironmentVariable("PORT") ?? "7165"; // Default to 7165 locally
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(int.Parse(port));
+});
 
 // Load configuration from appsettings.json and Secret Manager
 builder.Configuration.AddUserSecrets<Program>();
@@ -19,6 +25,7 @@ builder.Services.AddSwaggerGen();
 
 // Configure Email Sender
 builder.Services.AddTransient<ICustomEmailSender, EmailSender>();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -28,7 +35,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 4, 3)) // Use your MySQL version
     ));
-
 
 // Configure Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -42,16 +48,19 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000") // ✅ Change to your frontend URL
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
+            policy.WithOrigins(
+                "http://localhost:3000" // Local frontend URL
+
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
         });
 });
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
     options.JsonSerializerOptions.WriteIndented = true;
 });
 
@@ -68,7 +77,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || app.Environment.IsStaging())  // Ensure Swagger runs in dev & staging
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -93,9 +102,5 @@ app.MapControllerRoute(
 app.MapRazorPages(); // Required for Identity Razor Pages
 
 app.MapControllers();
-
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080"; // Default to 8080 if PORT is not set
-app.Urls.Add($"http://*:{port}");
-
 
 app.Run();
