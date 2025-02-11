@@ -1,74 +1,49 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - cvbuilder-frontend
+name: Deploy Next.js Frontend to Azure App Service
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      # Step 1: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js version
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22.x'
+          node-version: 18
 
-      - name: npm install, build, and test
+      # Step 3: Install Dependencies
+      - name: Install Dependencies
         run: |
+          cd frontend
           npm install
-          npm run build --if-present
-          npm run test --if-present
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+      # Step 4: Build the Next.js Application
+      - name: Build Next.js App
+        run: |
+          cd frontend
+          npm run build
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
+      # Step 5: Export Next.js Static Files
+        # Only required if your Next.js app is static (not server-rendered)
+      - name: Export Static Files
+        run: |
+          cd frontend
+          npm run export
+
+      # Step 6: Deploy to Azure
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
         with:
-          name: node-app
-          path: release.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_682BA7C61BA941F0838EDE1934FEBA99 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_619970FA55AF425BA6B243FA854CEEDE }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5D4772DB3600456B94E43600E13CBCBB }}
-
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'cvbuilder-frontend'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: <your-frontend-app-name> # Replace with your App Service name
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
+          package: ./frontend/out # Use './frontend' for dynamic SSR apps
