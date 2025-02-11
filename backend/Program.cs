@@ -3,6 +3,7 @@ using CVBuilder.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,25 +19,16 @@ builder.Services.AddSwaggerGen();
 
 // Configure Email Sender
 builder.Services.AddTransient<ICustomEmailSender, EmailSender>();
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configure Database (Render uses environment variables)
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING");
-
-Console.WriteLine($"🔍 DATABASE_CONNECTION_STRING: {databaseUrl}");
-
-if (string.IsNullOrEmpty(databaseUrl))
-{
-    throw new InvalidOperationException("❌ DATABASE_CONNECTION_STRING is not set.");
-}
-
+// Configure Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(databaseUrl));
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlServerVersion(new Version(8, 4, 3)) // Use your MySQL version
+    ));
 
-
-Console.WriteLine($"🔍 DATABASE_CONNECTION_STRING: {databaseUrl}");
 
 // Configure Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
