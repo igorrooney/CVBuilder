@@ -32,17 +32,11 @@ jobs:
           cd frontend
           npm run build
 
-      # Step 5: Export Static Files
-      - name: Export Static Files
-        run: |
-          cd frontend
-          npm run export
-
-      # Step 6: Deploy to Azure
+      # Step 5: Deploy to Azure
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: cvbuilder-frontend # Replace with your App Service name
+          app-name: cvbuilder-frontend # Replace with your Azure App Service name
           slot-name: production
           publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
-          package: ./frontend/out
+          package: ./frontend # Path to your frontend folder
