@@ -24,6 +24,10 @@ jobs:
         working-directory: ./backend
         run: dotnet publish -c Release -o myapp
 
+      - name: List published files (for debugging)
+        working-directory: ./backend
+        run: dir myapp
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -45,6 +49,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: myapp
+          path: ./myapp  # Ensures the artefact is downloaded to the expected path
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -53,10 +58,14 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # Optional: Uncomment the following step if you prefer to deploy a zipped package
+      # - name: Zip the folder
+      #   run: Compress-Archive -Path myapp\* -DestinationPath myapp.zip
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cvbuilder-backend'
-          package: ./myapp
+          package: ./myapp   # If using the zip step, change this to 'myapp.zip'
           slot-name: production
