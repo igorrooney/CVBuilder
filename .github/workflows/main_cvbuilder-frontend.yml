@@ -32,8 +32,7 @@ jobs:
           cd frontend
           npm run build
 
-      # Step 5: Export Next.js Static Files
-        # Only required if your Next.js app is static (not server-rendered)
+      # Step 5: Export Static Files
       - name: Export Static Files
         run: |
           cd frontend
@@ -43,7 +42,7 @@ jobs:
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: <your-frontend-app-name> # Replace with your App Service name
+          app-name: cvbuilder-frontend # Replace with your App Service name
           slot-name: production
           publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
-          package: ./frontend/out # Use './frontend' for dynamic SSR apps
+          package: ./frontend/out
