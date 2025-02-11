@@ -1,3 +1,4 @@
+# Workflow file: .github/workflows/azure-deploy.yml
 name: Build and deploy ASP.Net Core app to Azure Web App - cvbuilder-backend
 
 on:
@@ -10,7 +11,7 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read # This is required for actions/checkout
+      contents: read # Required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -20,19 +21,15 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Navigate to Backend Folder and Build
+      - name: Build and Publish
         working-directory: ./backend
-        run: dotnet build --configuration Release
-
-      - name: Publish Backend Project
-        working-directory: ./backend
-        run: dotnet publish -c Release -o "${{ runner.temp }}/myapp"
+        run: dotnet publish -c Release -o myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: backend-app
-          path: ${{ runner.temp }}/myapp
+          name: myapp
+          path: backend/myapp
 
   deploy:
     runs-on: windows-latest
@@ -41,15 +38,15 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write # This is required for requesting the JWT
-      contents: read  # This is required for actions/checkout
+      id-token: write # Required for requesting the JWT
+      contents: read # Required for actions/checkout
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: backend-app
-      
+          name: myapp
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -62,5 +59,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cvbuilder-backend'
-          slot-name: 'Production'
-          package: ${{ runner.temp }}/myapp
+          package: ./myapp
