@@ -1,4 +1,3 @@
-# Workflow file: .github/workflows/azure-deploy.yml
 name: Build and deploy ASP.Net Core app to Azure Web App - cvbuilder-backend
 
 on:
@@ -60,3 +59,4 @@ jobs:
         with:
           app-name: 'cvbuilder-backend'
           package: ./myapp
+          slot-name: production
