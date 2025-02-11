@@ -1,0 +1,49 @@
+name: Deploy Next.js Frontend to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Step 3: Install Dependencies
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      # Step 4: Build the Next.js Application
+      - name: Build Next.js App
+        run: |
+          cd frontend
+          npm run build
+
+      # Step 5: Export Next.js Static Files
+        # Only required if your Next.js app is static (not server-rendered)
+      - name: Export Static Files
+        run: |
+          cd frontend
+          npm run export
+
+      # Step 6: Deploy to Azure
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: <your-frontend-app-name> # Replace with your App Service name
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
+          package: ./frontend/out # Use './frontend' for dynamic SSR apps
