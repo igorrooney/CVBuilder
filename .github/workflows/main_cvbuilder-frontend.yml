@@ -32,11 +32,16 @@ jobs:
           cd frontend
           npm run build
 
-      # Step 5: Deploy to Azure
+      # Step 5: Azure Login
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Step 6: Deploy to Azure
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: cvbuilder-frontend # Replace with your Azure App Service name
+          app-name: cvbuilder-frontend # Replace with your App Service name
           slot-name: production
-          credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          package: ./frontend # Path to your frontend folder
+          package: ./frontend
