@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: |
           cd frontend
-          npm install
+          npm ci
 
       # Step 4: Build the Next.js Application
       - name: Build Next.js App
