@@ -32,7 +32,7 @@ jobs:
           cd frontend
           npm run build
 
-      # Step 5: Azure Login
+      # Step 5: Login to Azure
       - name: Login to Azure
         uses: azure/login@v1
         with:
