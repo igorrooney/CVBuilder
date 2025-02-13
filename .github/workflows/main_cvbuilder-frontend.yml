@@ -44,4 +44,5 @@ jobs:
         with:
           app-name: cvbuilder-frontend # Replace with your App Service name
           slot-name: production
-          package: ./frontend
+          package: ./frontend/.next
+
