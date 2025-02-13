@@ -68,6 +68,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'cvbuilder-backend'
+          app-name: 'cvbuilder-backend-test'
           package: ./myapp   # If using the zip step, change this to 'myapp.zip'
           slot-name: production
