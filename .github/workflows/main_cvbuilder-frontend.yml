@@ -32,17 +32,23 @@ jobs:
           cd frontend
           npm run build
 
-      # Step 5: Login to Azure
+      # Step 5: Create Deployment Package (ZIP)
+      - name: Create Deployment Package
+        run: |
+          cd frontend
+          # Zip the contents of the frontend folder, excluding node_modules, logs, .git, and any other unnecessary files
+          zip -r ../deploy.zip . -x "node_modules/*" -x "*.log" -x "coverage/*" -x ".git/*"
+
+      # Step 6: Login to Azure
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Step 6: Deploy to Azure
+      # Step 7: Deploy to Azure
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: cvbuilder-frontend # Replace with your App Service name
+          app-name: cvbuilder-frontend  # Replace with your App Service name
           slot-name: production
-          package: ./frontend
-
+          package: ./deploy.zip
