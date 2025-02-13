@@ -20,7 +20,7 @@ export default function Home() {
 
     return (
         <div>
-            <h1>My CVs</h1>
+            <h1>Main</h1>
             <ul>
                 {cvs.map((cv) => (
                     <li key={cv.id}>{cv.firstName} {cv.lastName}</li>
