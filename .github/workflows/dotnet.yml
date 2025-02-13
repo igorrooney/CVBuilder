@@ -2,9 +2,9 @@ name: .NET Build & Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "test" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "test" ]
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x  # Match your project’s .NET version
+        dotnet-version: 7.0.x  # Match your projectâ€™s .NET version
 
     - name: Restore dependencies
       run: dotnet restore
