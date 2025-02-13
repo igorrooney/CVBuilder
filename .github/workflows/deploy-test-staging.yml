@@ -1,0 +1,73 @@
+name: Deploy Backend to Azure Staging
+
+on:
+  push:
+    branches:
+      - test
+    paths:
+      - 'backend/**'  # Only trigger for changes in the `backend` folder
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read # Required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Build and Publish
+        working-directory: ./backend
+        run: dotnet publish -c Release -o myapp
+
+      - name: List published files (for debugging)
+        working-directory: ./backend
+        run: dir myapp
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: myapp
+          path: ./backend/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write # Required for requesting the JWT
+      contents: read # Required for actions/checkout
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: myapp
+          path: ./myapp  # Ensures the artefact is downloaded to the expected path
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Optional: Uncomment the following step if you prefer to deploy a zipped package
+      # - name: Zip the folder
+      #   run: Compress-Archive -Path myapp\* -DestinationPath myapp.zip
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'cvbuilder-backend'
+          package: ./myapp   # If using the zip step, change this to 'myapp.zip'
+          slot-name: production
