@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using CVBuilder.Models;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace CVBuilder.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Ensure authentication is required
+    [Authorize]
     public class ProfileController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -23,24 +23,46 @@ namespace CVBuilder.Controllers
         [HttpGet("ViewProfile")]
         public async Task<IActionResult> ViewProfile()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token: user identifier is missing.");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
             if (user == null)
             {
                 return Unauthorized("User not found. Please log in.");
             }
 
-            return Ok(user);
+            return Ok(new
+            {
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.PhoneNumber,
+                user.Address
+            });
         }
 
         // GET: api/Profile/Edit
         [HttpGet("Edit")]
         public async Task<IActionResult> Edit()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token: user identifier is missing.");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return Unauthorized("User not found. Please log in.");
             }
+
             return Ok(user);
         }
 
@@ -53,15 +75,16 @@ namespace CVBuilder.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _userManager.GetUserAsync(User);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token: user identifier is missing.");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return Unauthorized("User not found. Please log in.");
-            }
-
-            if (user.Id != model.Id)
-            {
-                return Forbid();
             }
 
             // Update user details
