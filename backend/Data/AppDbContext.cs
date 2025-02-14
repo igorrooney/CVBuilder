@@ -14,10 +14,22 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
 
-        // Configure the relationship (optional if conventions are followed)
+        // Configure CV and ApplicationUser relationship
         builder.Entity<CV>()
             .HasOne(c => c.User)
             .WithMany(u => u.CVs)
             .HasForeignKey(c => c.UserId);
+
+        // Configure WorkExperience and CV relationship
+        builder.Entity<WorkExperience>()
+            .HasOne(w => w.CV)
+            .WithMany(c => c.WorkExperiences)
+            .HasForeignKey(w => w.CVId);
+
+        // Configure Education and CV relationship
+        builder.Entity<Education>()
+            .HasOne(e => e.CV)
+            .WithMany(c => c.Educations)
+            .HasForeignKey(e => e.CVId);
     }
 }

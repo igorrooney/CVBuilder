@@ -24,13 +24,20 @@ namespace CVBuilder.Models
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
 
-        [JsonIgnore]  // ✅ This prevents circular reference issues
+        // Ensures that navigation properties do not cause circular references in JSON serialization
+        [JsonIgnore]
         public virtual ICollection<CV>? CVs { get; set; } = new List<CV>();
 
+        // Override Email with [ProtectedPersonalData] to comply with privacy standards
         [ProtectedPersonalData]
         public override string Email { get; set; }
 
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string? Address { get; set; }
+
+        // Optional: Add PhoneNumber with validation if needed
+        [Phone]
+        [StringLength(15, ErrorMessage = "Phone number cannot exceed 15 characters.")]
+        public override string? PhoneNumber { get; set; }
     }
 }
