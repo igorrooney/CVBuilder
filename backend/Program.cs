@@ -103,8 +103,9 @@ builder.Services.AddCors(options =>
 // Configure JSON options for controllers
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // Preserve object references
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; // Handle cycles without $id
     options.JsonSerializerOptions.WriteIndented = true; // Pretty print JSON for better readability
+    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull; // Optional: Ignore null properties
 });
 
 var app = builder.Build();
