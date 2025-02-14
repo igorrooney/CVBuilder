@@ -1,4 +1,4 @@
-name: Build and deploy ASP.Net Core app to Azure Web App - cvbuilder-backend
+name: main - Build and deploy ASP.Net Core app to Azure Web App - cvbuilder-backend
 
 on:
   push:
