@@ -1,48 +1,55 @@
 # CV Builder
 
-Welcome to **CV Builder**, an open-source project designed to help users create professional CVs tailored to specific country rules. This project is currently in development, starting with an MVC version, and will later include advanced features like AI assistance and premium functionalities.
+## Project Overview
+CV Builder is an AI-powered platform designed to help users create professional CVs and cover letters. The platform follows British CV rules and offers advanced features like ATS compatibility analysis, localized templates, and AI-powered content suggestions.
 
 ## Features
 
-### Current Features (MVC Version)
-- **User Authentication**: Register and log in to manage your CVs.
-- **CV Creation**: Create and edit CVs with sections for personal information, work experience, education, and more.
-- **Export to PDF**: Export your CV to a PDF file following British CV rules.
-- **Database Integration**: Save and retrieve CVs using Entity Framework Core.
+- **Frontend**: Hosted on [Vercel](https://vercel.com), with support for branch-specific preview deployments. The production environment is automatically built and deployed for the `main` branch, while the `test` branch has a dedicated staging environment.
+- **Backend**: Deployed to Azure App Service. Separate app services are used for production and staging environments.
+- **CI/CD Workflows**:
+  - **Frontend**: Deployments are managed directly through Vercel's GitHub integration.
+  - **Backend**: GitHub Actions builds and deploys changes to Azure App Service when changes are made in the `backend/` directory.
 
-### Planned Features
-- **AI Assistance**: Get AI-driven suggestions to improve your CV content.
-- **Premium Features**:
-  - Advanced CV templates.
-  - AI-powered CV optimization.
-  - Multi-language support.
-- **Country-Specific Rules**: Support for CV formats tailored to different countries (e.g., EU, US).
-
-## Getting Started
+## Project Setup
 
 ### Prerequisites
-- [.NET 7.0 SDK](https://dotnet.microsoft.com/download/dotnet/7.0)
-- [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) (or any code editor with .NET support)
-- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (or SQL Server Express)
+1. Node.js (version 18 or higher)
+2. .NET SDK (version 8 or higher)
 
-### Installation
-1. Clone the repository:
+
+### Running the Project Locally
+
+#### Frontend
+1. Navigate to the `frontend/` directory:
    ```bash
-   git clone https://github.com/igorrooney/CVBuilder.git
-2. Navigate to the project directory:
+   cd frontend
+2. Install dependencies:
 	```bash
-	cd CVBuilder
-3. Restore dependencies:
+	npm ci
+3. Start the development server:
 	```bash
-	dotnet restore
-4. Run the application:
+	npm run dev
+4. Open http://localhost:3000 in your browser to view the application.
+
+#### Backend
+1. Navigate to the backend/ directory:
+	```bash
+	cd backend
+2. Add a appsettings.json file to configure the database connection string. Example:
+	```bash
+	"ConnectionStrings": {
+		"DefaultConnection": "Server=localhost;Database=CVBuilder;User Id=your-username;Password=your-password;"
+	}
+		
+3. Run the application:
 	```bash
 	dotnet run
-5. Open your browser and navigate to https://localhost:5078.
+4. The backend will be available at http://localhost:7165 (or the default port configured in your project).
 
 ## How to Collaborate
 
-We welcome contributions from the community! Here’s how you can help:
+We welcome contributions from the community! Hereï¿½s how you can help:
 
 ### Reporting Issues
 - If you find a bug or have a feature request, please open an issue on the [GitHub Issues page](https://github.com/igorrooney/CVBuilder/issues).
@@ -59,7 +66,7 @@ We welcome contributions from the community! Here’s how you can help:
 4. Push your changes to your fork:
 	```bash
 	git push origin feature/your-feature-name
-5. Open a pull request (PR) to the main branch of the original repository.
+5. Open a pull request (PR) to the test branch of the original repository.
 
 ### Development Guidelines
 - Follow the existing code style and naming conventions.
@@ -67,10 +74,21 @@ We welcome contributions from the community! Here’s how you can help:
 - Ensure your code is well-documented and includes unit tests where applicable.
 
 ## Roadmap
-- **Phase 1**: MVC version with basic CV creation and PDF export (current phase).
-- **Phase 2**: Add AI assistance for CV content improvement.
-- **Phase 3**: Implement premium features (e.g., advanced templates, multi-language support).
-- **Phase 4**: Support for country-specific CV rules (e.g., EU, US).
+1. **Core Features (Current Status)**: 
+- Implement basic CV and cover letter generation functionality .
+- Set up CI/CD workflows for frontend and backend.
+- Configure branch-specific deployments.
+2. **Phase 1: Premium Features:**: 
+- AI-powered CV scoring and improvement suggestions (Planned).
+- Real-time ATS compatibility analysis (Planned).
+- Industry-specific CV templates (Planned).
+3. **Phase 2: Collaboration Tools:**:
+- Add collaborative editing capabilities (Planned).
+- Introduce job application tracking and reminders (Planned).
+- Provide an interview preparation guide with mock interview simulations (Planned).
+4. **Phase 3: Advanced Integrations:**: 
+- LinkedIn profile import for auto-filling CV fields (Planned).
+- AI-powered job matching suggestions based on user CVs (Planned).
 
 ## License
 
@@ -79,4 +97,6 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 ## Acknowledgments
 
 - Thanks to the .NET community for providing excellent tools and resources.
+- Thanks to the Next.js community for their outstanding framework and documentation.
+- Thanks to AWS RDS for providing a reliable database management system.
 - Special thanks to all contributors who help improve this project.
