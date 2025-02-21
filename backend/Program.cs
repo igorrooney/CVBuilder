@@ -92,7 +92,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // Replace with your frontend's URL
+        policy.WithOrigins(
+            "http://localhost:3000", 
+            "https://cv-builder-git-test-igors-projects-baae4c6f.vercel.app",
+            "https://cv-builder-teal.vercel.app") // Replace with your frontend's URL
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
