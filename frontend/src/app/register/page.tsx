@@ -2,6 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
 import { IRegisterPayload } from "@/types/RegisterTypes";
@@ -19,6 +20,8 @@ const schema = z.object({
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [successMessage, setSuccessMessage] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -40,13 +43,23 @@ export default function RegisterPage() {
       return response.json();
     },
     onSuccess: () => {
-      router.push("/login");
+      setSuccessMessage("Registration successful! Redirecting to login...");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000); // Redirect after 2 seconds
     },
   });
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-4">Register</h2>
+
+      {successMessage && (
+        <div className="bg-green-100 text-green-700 p-3 rounded-md text-center mb-4">
+          {successMessage}
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit((data) => mutate(data))}
         className="space-y-4"
