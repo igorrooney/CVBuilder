@@ -49,11 +49,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Configure Identity for Authentication and Authorization
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    //options.Password.RequireDigit = true;
-    //options.Password.RequiredLength = 8;
-    //options.Password.RequireNonAlphanumeric = false;
-    //options.Password.RequireUppercase = true;
-    //options.Password.RequireLowercase = true;
+    options.Password.RequireDigit = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
     options.SignIn.RequireConfirmedAccount = false;
     options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier; // Map NameIdentifier to User ID
     options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name; // Map Name to UserName

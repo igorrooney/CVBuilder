@@ -1,24 +1,29 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-public class RegisterModel
+namespace CVBuilder.Models
 {
-    [Required]
-    [EmailAddress]
-    public string Email { get; set; }
+    public class RegisterRequestModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
 
-    [Required]
-    [StringLength(100, MinimumLength = 6)]
-    public string Password { get; set; }
+        [Required]
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters.")]
+        public string FirstName { get; set; }
 
-    [Compare("Password")]
-    public string ConfirmPassword { get; set; }
+        [Required]
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters.")]
+        public string LastName { get; set; }
 
-    [Required]
-    [StringLength(50)]
-    public string FirstName { get; set; }
+        [Required]
+        [DataType(DataType.Password)]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be between 8 and 100 characters.")]
+        public string Password { get; set; }
 
-    [Required]
-    [StringLength(50)]
-    public string LastName { get; set; }
+        [Required]
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "Passwords do not match.")]
+        public string ConfirmPassword { get; set; }
+    }
 }
-
