@@ -2,7 +2,7 @@
 
 namespace CVBuilder.Models
 {
-    public class RegisterModel
+    public class RegisterRequestModel
     {
         [Required]
         [EmailAddress]
@@ -18,7 +18,7 @@ namespace CVBuilder.Models
 
         [Required]
         [DataType(DataType.Password)]
-        [MinLength(8, ErrorMessage = "Password must be at least 8 characters long.")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be between 8 and 100 characters.")]
         public string Password { get; set; }
 
         [Required]
