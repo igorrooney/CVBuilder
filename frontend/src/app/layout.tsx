@@ -1,14 +1,17 @@
+import ClientProviders from "@/components/ClientProviders";
+import React from "react";
 import "./globals.css";
-import React from 'react';
-import ClientProviders from '@/components/ClientProviders'; // adjust the path as needed
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
+      <head />
       <body>
-        <ClientProviders>
-          {children}
-        </ClientProviders>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
