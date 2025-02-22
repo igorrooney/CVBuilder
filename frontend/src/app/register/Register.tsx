@@ -59,11 +59,11 @@ export default function Register() {
     <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-4">Register</h2>
 
-      {successMessage && (
+      {!!successMessage ? (
         <div className="bg-green-100 text-green-700 p-3 rounded-md text-center mb-4">
           {successMessage}
         </div>
-      )}
+      ) : null}
 
       <form
         onSubmit={handleSubmit((data) => mutate(data))}
