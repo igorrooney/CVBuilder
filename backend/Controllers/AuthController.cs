@@ -71,6 +71,7 @@ public class AuthController : ControllerBase
             HttpOnly = true, // Prevent JavaScript access
             Secure = true,
             SameSite = SameSiteMode.None,
+            Path = "/",
             Expires = DateTime.UtcNow.AddHours(1)
         };
 
@@ -108,9 +109,19 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("jwt");
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = "/",
+            Expires = DateTime.UtcNow.AddDays(-1)
+        };
+        Response.Cookies.Delete("jwt", cookieOptions);
+
         return Ok(new { message = "Logged out successfully" });
     }
+
 
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser()
