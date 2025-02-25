@@ -1,4 +1,5 @@
 ﻿using CVBuilder.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -57,15 +58,27 @@ public class AuthController : ControllerBase
 
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
-            return Unauthorized("Invalid credentials");
+            return Unauthorized(new { message = "Invalid credentials" });
 
         var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, false, false);
         if (!result.Succeeded)
-            return Unauthorized("Invalid credentials");
+            return Unauthorized(new { message = "Invalid credentials" });
 
         var token = GenerateJwtToken(user);
-        return Ok(new { Token = token });
+
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true, // Prevent JavaScript access
+            Secure = true, // Use HTTPS (set to false for local testing)
+            SameSite = SameSiteMode.Strict, // Prevent CSRF attacks
+            Expires = DateTime.UtcNow.AddHours(1)
+        };
+
+        Response.Cookies.Append("jwt", token, cookieOptions);
+
+        return Ok(new { message = "Login successful" });
     }
+
 
     private string GenerateJwtToken(ApplicationUser user)
     {
@@ -92,4 +105,46 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("jwt");
+        return Ok(new { message = "Logged out successfully" });
+    }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        var token = Request.Cookies["jwt"];
+        if (string.IsNullOrEmpty(token))
+        {
+            return Unauthorized(new { message = "User is not authenticated" });
+        }
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+        var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User is not authenticated" });
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not found" });
+        }
+
+        return Ok(new
+        {
+            id = user.Id,
+            email = user.Email,
+            firstName = user.FirstName,
+            lastName = user.LastName
+        });
+    }
+
+
 }
+
