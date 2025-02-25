@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,6 +25,12 @@ export default function Login() {
     resolver: zodResolver(schema),
   });
 
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [isLoading, user, router]);
+
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: { email: string; password: string }) => {
       const response = await fetch(
@@ -32,7 +38,7 @@ export default function Login() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", // Send HTTP-only cookie
+          credentials: "include",
           body: JSON.stringify(formData),
         }
       );
@@ -41,11 +47,10 @@ export default function Login() {
       if (!response.ok) {
         throw new Error(data.message || "Invalid credentials");
       }
-
       return data;
     },
     onSuccess: () => {
-      router.push("/dashboard"); // Redirect to dashboard
+      router.push("/dashboard");
     },
     onError: (error: unknown) => {
       if (error instanceof Error) {
@@ -58,11 +63,6 @@ export default function Login() {
 
   if (isLoading) return <p>Loading...</p>;
 
-  if (user) {
-    router.push("/dashboard");
-    return null;
-  }
-
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-4">Log in</h2>
@@ -73,10 +73,7 @@ export default function Login() {
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit((data) => mutate(data))}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit((data) => mutate(data))} className="space-y-4">
         <div>
           <input
             type="email"
