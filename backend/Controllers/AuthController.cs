@@ -69,8 +69,8 @@ public class AuthController : ControllerBase
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true, // Prevent JavaScript access
-            Secure = true, // Use HTTPS (set to false for local testing)
-            SameSite = SameSiteMode.Strict, // Prevent CSRF attacks
+            Secure = true,
+            SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddHours(1)
         };
 
