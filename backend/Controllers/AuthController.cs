@@ -14,12 +14,20 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
+    private readonly IHostEnvironment _hostEnvironment;
 
-    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+    public AuthController(
+        UserManager<ApplicationUser> userManager, 
+        SignInManager<ApplicationUser> signInManager, 
+        IConfiguration configuration, 
+        IHostEnvironment hostEnvironment
+        )
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
+        _hostEnvironment = hostEnvironment;
+
     }
 
     [HttpPost("register")]
@@ -65,11 +73,12 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid credentials" });
 
         var token = GenerateJwtToken(user);
+        var isDevelopment = _hostEnvironment.IsDevelopment();
 
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true, // Prevent JavaScript access
-            Secure = true,
+            Secure = !isDevelopment,
             SameSite = SameSiteMode.None,
             Path = "/",
             Expires = DateTime.UtcNow.AddHours(1)
@@ -109,10 +118,11 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
+        var isDevelopment = _hostEnvironment.IsDevelopment();
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = !isDevelopment,
             SameSite = SameSiteMode.None,
             Path = "/",
             Expires = DateTime.UtcNow.AddDays(-1)
