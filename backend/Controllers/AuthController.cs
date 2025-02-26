@@ -78,7 +78,7 @@ public class AuthController : ControllerBase
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true, // Prevent JavaScript access
-            Secure = !isDevelopment,
+            Secure = true,
             SameSite = SameSiteMode.None,
             Path = "/",
             Expires = DateTime.UtcNow.AddHours(1)
@@ -122,7 +122,7 @@ public class AuthController : ControllerBase
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = !isDevelopment,
+            Secure = true,
             SameSite = SameSiteMode.None,
             Path = "/",
             Expires = DateTime.UtcNow.AddDays(-1)
