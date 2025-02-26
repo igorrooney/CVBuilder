@@ -1,9 +1,8 @@
 "use client";
-import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Dashboard() {
   return (
-    <ProtectedRoute>
+    <>
       <h1 className="text-2xl font-bold">Welcome to your Dashboard</h1>
       <button
         className="mt-4 bg-red-600 text-white p-2 rounded-md"
@@ -17,6 +16,6 @@ export default function Dashboard() {
       >
         Log out
       </button>
-    </ProtectedRoute>
+    </>
   );
 }
