@@ -88,7 +88,7 @@ public class AuthController : ControllerBase
 
         Response.Cookies.Append("jwt", token, cookieOptions);
 
-        return Ok(new { message = "Login successful" });
+        return Ok(new { message = "Login successful!", token });
     }
 
 

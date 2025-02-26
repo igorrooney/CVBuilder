@@ -2,10 +2,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useAuth } from "@/hooks/useAuth";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -14,7 +13,6 @@ const schema = z.object({
 
 export default function Login() {
   const router = useRouter();
-  const { data: user, isLoading } = useAuth();
   const [errorMessage, setErrorMessage] = useState("");
 
   const {
@@ -25,23 +23,19 @@ export default function Login() {
     resolver: zodResolver(schema),
   });
 
-  useEffect(() => {
-    if (!isLoading && user) {
-      router.push("/dashboard");
-    }
-  }, [isLoading, user, router]);
-
+  // Use React Query to handle the login mutation
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: { email: string; password: string }) => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(formData),
-        }
-      );
+      // Instead of calling your Azure backend directly,
+      // call the Next.js route `/api/login`.
+      // This route will forward credentials to Azure internally
+      // and set a JWT cookie on the Next.js domain.
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // important for storing cookies
+        body: JSON.stringify(formData),
+      });
 
       const data = await response.json();
       if (!response.ok) {
@@ -50,6 +44,7 @@ export default function Login() {
       return data;
     },
     onSuccess: () => {
+      // After a successful login, navigate to dashboard
       router.push("/dashboard");
     },
     onError: (error: unknown) => {
@@ -61,8 +56,6 @@ export default function Login() {
     },
   });
 
-  if (isLoading) return <p>Loading...</p>;
-
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-4">Log in</h2>
@@ -73,7 +66,10 @@ export default function Login() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit((data) => mutate(data))} className="space-y-4">
+      <form
+        onSubmit={handleSubmit((data) => mutate(data))}
+        className="space-y-4"
+      >
         <div>
           <input
             type="email"
