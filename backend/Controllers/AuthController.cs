@@ -86,7 +86,7 @@ public class AuthController : ControllerBase
             Expires = DateTime.UtcNow.AddHours(1)
         };
 
-        Response.Cookies.Append("jwt", token, cookieOptions);
+        //Response.Cookies.Append("jwt", token, cookieOptions);
 
         return Ok(new { message = "Login successful!", token });
     }
