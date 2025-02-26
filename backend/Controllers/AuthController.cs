@@ -27,6 +27,7 @@ public class AuthController : ControllerBase
         _signInManager = signInManager;
         _configuration = configuration;
         _hostEnvironment = hostEnvironment;
+        Console.WriteLine($"EnvironmentName: {hostEnvironment.EnvironmentName}");
 
     }
 
@@ -73,13 +74,14 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid credentials" });
 
         var token = GenerateJwtToken(user);
+        // Check if environment is Development
         var isDevelopment = _hostEnvironment.IsDevelopment();
 
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true, // Prevent JavaScript access
-            Secure = true,
-            SameSite = SameSiteMode.None,
+            Secure = !isDevelopment, // In Development, set Secure=false
+            SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.None,
             Path = "/",
             Expires = DateTime.UtcNow.AddHours(1)
         };
@@ -118,12 +120,13 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
+        // Check if environment is Development
         var isDevelopment = _hostEnvironment.IsDevelopment();
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
+            Secure = !isDevelopment, // In Development, set Secure=false
+            SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.None,
             Path = "/",
             Expires = DateTime.UtcNow.AddDays(-1)
         };
