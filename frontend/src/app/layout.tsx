@@ -53,7 +53,11 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body>
-        <ClientProviders>{children}</ClientProviders>
+        <ClientProviders>
+          <main role="main">
+            {children}
+          </main>
+        </ClientProviders>
       </body>
     </html>
   );
