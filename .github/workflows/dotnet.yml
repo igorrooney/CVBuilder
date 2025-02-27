@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ "main", "test" ]
 
+permissions:
+  contents: read  # Read-only access to repo contents
+  packages: read  # Read-only access to NuGet packages
+  actions: read   # Read-only access to GitHub Actions
+  pull-requests: write  # Only if needed for PR comments
+
 jobs:
   build:
     runs-on: windows-latest  # Windows is better for .NET projects
