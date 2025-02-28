@@ -120,7 +120,7 @@ public class AuthController : ControllerBase
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(7)
+            expires: DateTime.UtcNow.AddDays(7),
             //expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["TokenExpiryInMinutes"])),
             signingCredentials: creds);
 
