@@ -1,107 +1,105 @@
 "use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 
-const schema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import styled from "styled-components";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLogin } from "@/hooks/useAuth";
+
+// Define a Zod schema for the login form.
+const loginSchema = z.object({
+  email: z
+    .string()
+    .nonempty({ message: "Email is required" })
+    .email({ message: "Invalid email address" }),
+  password: z.string().nonempty({ message: "Password is required" }),
+  rememberMe: z.boolean().optional(),
 });
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(schema),
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
   });
 
-  // Use React Query to handle the login mutation
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (formData: { email: string; password: string }) => {
-      // Instead of calling your Azure backend directly,
-      // call the Next.js route `/api/login`.
-      // This route will forward credentials to Azure internally
-      // and set a JWT cookie on the Next.js domain.
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // important for storing cookies
-        body: JSON.stringify(formData),
-      });
+  const loginMutation = useLogin();
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials");
-      }
-      return data;
-    },
-    onSuccess: () => {
-      // After a successful login, navigate to dashboard
-      router.push("/dashboard");
-    },
-    onError: (error: unknown) => {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage("An unknown error occurred");
-      }
-    },
-  });
-
+  const onSubmit = (data: LoginFormValues) => {
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        router.push("/dashboard");
+      },
+    });
+  };
   return (
-    <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-4">Log in</h2>
-
-      {errorMessage && (
-        <div className="bg-red-100 text-red-700 p-3 rounded-md text-center mb-4">
-          {errorMessage}
-        </div>
-      )}
-
+    <div className="min-h-screen flex justify-center items-center bg-gray-100 p-4">
       <form
-        onSubmit={handleSubmit((data) => mutate(data))}
-        className="space-y-4"
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white p-6 rounded shadow-md w-full max-w-md"
       >
-        <div>
+        <h2 className="text-2xl text-center text-blue-600 mb-6">Log in</h2>
+        {loginMutation.isError && (
+          <p className="text-red-500 text-center mb-4">
+            Invalid credentials. Please try again.
+          </p>
+        )}
+        <div className="mb-4">
+          <label htmlFor="email" className="block text-gray-700 mb-2">
+            Email
+          </label>
           <input
+            id="email"
             type="email"
-            placeholder="Email"
             {...register("email")}
-            className="w-full p-3 border rounded-md"
+            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
           />
           {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
+            <p className="text-red-500 mt-1">{errors.email.message}</p>
           )}
         </div>
-
-        <div>
+        <div className="mb-4">
+          <label htmlFor="password" className="block text-gray-700 mb-2">
+            Password
+          </label>
           <input
+            id="password"
             type="password"
-            placeholder="Password"
             {...register("password")}
-            className="w-full p-3 border rounded-md"
+            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
           />
           {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
+            <p className="text-red-500 mt-1">{errors.password.message}</p>
           )}
         </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700"
-          disabled={isPending}
-        >
-          {isPending ? "Logging in..." : "Log in"}
-        </button>
+        <div className="flex items-center mb-6">
+          <input
+            id="rememberMe"
+            type="checkbox"
+            {...register("rememberMe")}
+            className="mr-2"
+          />
+          <label htmlFor="rememberMe" className="text-gray-700">
+            Remember Me
+          </label>
+        </div>
+        <StyledButton type="submit" disabled={loginMutation.isPending}>
+          {loginMutation.isPending ? "Logging in..." : "Log in"}
+        </StyledButton>
       </form>
     </div>
   );
 }
+
+// A styled button that combines Tailwind CSS utility classes with styled-components.
+const StyledButton = styled.button`
+  @apply w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700;
+`;

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Example interface for the login payload
 interface LoginPayload {
   email: string;
   password: string;
@@ -12,38 +11,45 @@ export async function POST(req: NextRequest) {
   // Parse the JSON body from the client request
   const body: LoginPayload = await req.json();
 
-  // Forward the credentials to your Azure backend
+  // Forward the credentials to the Azure backend
   const azureResponse = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      // Note: No "credentials: include" here, because this is server-to-server
     }
   );
 
-  // 3. Handle potential errors from the Azure backend
+  // Handle potential errors from the Azure backend
   if (!azureResponse.ok) {
     const errorData = await azureResponse.json();
     return NextResponse.json(errorData, { status: azureResponse.status });
   }
 
-  // Extract the token from Azure's response
+  // Extract tokens (access + refresh) from Azure's response
   const azureData = await azureResponse.json();
+  const { accessToken, refreshToken } = azureData;
 
-  const token = azureData.token;
-
-  // Create a response to send back to the client
+  // Create a NextResponse to send back to the client
   const response = NextResponse.json({ message: "Login successful" });
 
-  // Set a JWT cookie on the Next.js domain
-  response.cookies.set("jwt", token, {
+  // Set an HTTP-only cookie for the ACCESS TOKEN (short-lived)
+  response.cookies.set("accessToken", accessToken, {
     httpOnly: true,
-    secure: !isDevelopment, // In dev: false, in prod: true
+    secure: !isDevelopment,            // Secure in prod
     sameSite: isDevelopment ? "lax" : "none", // "none" requires HTTPS
     path: "/",
-    maxAge: 60 * 60, // 1 hour in seconds
+    maxAge: 60 * 60 * 24, // 1 day in seconds
+  });
+
+  // Set an HTTP-only cookie for the REFRESH TOKEN (longer-lived)
+  response.cookies.set("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: !isDevelopment,
+    sameSite: isDevelopment ? "lax" : "none",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
   });
 
   return response;
