@@ -1,20 +1,47 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { LoginPayload } from "@/types/LoginTypes";
+import apiClient from "@/lib/apiClient";
 
-export const useAuth = () => {
-  return useQuery({
-    queryKey: ["auth"],
-    queryFn: async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`,
-        {
-          method: "GET",
-          credentials: "include", // Send HTTP-only cookies
-        }
-      );
-
-      if (!response.ok) throw new Error("Unauthorized");
-      return response.json();
+export function useLogin() {
+  return useMutation({
+    mutationFn: (data: LoginPayload) => {
+      return apiClient.post("/auth/login", data);
     },
-    retry: false, // Avoid retrying if user is not authenticated
+
+    onSuccess: () => {
+      console.log("Login successful!");
+    },
+
+    onError: (error) => {
+      console.error("Login failed:", error);
+    },
   });
-};
+}
+
+export function useLogout() {
+  return useMutation({
+    mutationFn: () => {
+      return apiClient.post("/auth/logout");
+    },
+
+    onSuccess: () => {
+      console.log("Logged out successfully!");
+    },
+
+    onError: (error) => {
+      console.error("Logged out failed:", error);
+    },
+  });
+}
+
+// Hook to fetch the current user's profile
+// The server can read the JWT from the cookie to identify the user.
+export function useCurrentUser() {
+  return useQuery({
+    queryKey: ["currentUser"],
+    queryFn: async () => {
+      const response = await apiClient.get("/auth/me");
+      return response.data;
+    }
+  });
+}

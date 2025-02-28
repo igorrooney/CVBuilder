@@ -9,6 +9,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CV> CVs { get; set; }
     public DbSet<WorkExperience> WorkExperiences { get; set; }
     public DbSet<Education> Educations { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -31,5 +32,10 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(e => e.CV)
             .WithMany(c => c.Educations)
             .HasForeignKey(e => e.CVId);
+
+        builder.Entity<RefreshToken>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId);
     }
 }
