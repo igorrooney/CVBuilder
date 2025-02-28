@@ -120,8 +120,7 @@ public class AuthController : ControllerBase
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(1),
-            //expires: DateTime.UtcNow.AddHours(12),
+            expires: DateTime.UtcNow.AddDays(7)
             //expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["TokenExpiryInMinutes"])),
             signingCredentials: creds);
 
@@ -194,7 +193,7 @@ public class AuthController : ControllerBase
         {
             Token = refreshTokenString,
             UserId = user.Id,
-            Expires = DateTime.UtcNow.AddDays(7), // 7-day refresh token
+            Expires = DateTime.UtcNow.AddDays(14), // 14-days refresh token
             IsRevoked = false,
             CreatedAt = DateTime.UtcNow,
             CreatedByIp = ipAddress
