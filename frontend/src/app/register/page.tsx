@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Register from "./Register";
 
 export const metadata: Metadata = {
-  title: "Register | CV Builder",
+  title: "Register",
   description:
     "Register to CV Builder and start creating your professional CVs and cover letters.",
   keywords: "Register, CV Builder, Professional Resumes, Cover Letters",
