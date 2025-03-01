@@ -59,7 +59,11 @@ const InputField = ({
       )}
     />
     {errors[name]?.message && (
-      <p className="text-red-700 text-sm mt-1" role="alert" aria-live="polite">
+      <p
+        className="text-red-700 text-sm mt-1"
+        role="alert"
+        aria-live="assertive"
+      >
         {errors[name].message}
       </p>
     )}
@@ -116,7 +120,10 @@ export default function Register() {
   };
 
   return (
-    <main className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+    <main
+      className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8"
+      aria-hidden="false"
+    >
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <Image
           alt="CVBuilder Logo"
@@ -136,6 +143,7 @@ export default function Register() {
           <div
             className="bg-red-100 text-red-700 p-3 rounded-md text-center mb-4"
             role="alert"
+            aria-live="assertive"
           >
             {errorMessage}
           </div>
@@ -144,6 +152,7 @@ export default function Register() {
           <div
             className="bg-green-100 text-green-700 p-3 rounded-md text-center mb-4"
             role="alert"
+            aria-live="polite"
           >
             {successMessage}
           </div>
@@ -190,7 +199,7 @@ export default function Register() {
           <button
             type="submit"
             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500"
-            disabled={isLoading}
+            aria-disabled={isLoading}
           >
             {isLoading ? (
               <span className="animate-spin border-2 border-white border-t-transparent rounded-full h-5 w-5"></span>
