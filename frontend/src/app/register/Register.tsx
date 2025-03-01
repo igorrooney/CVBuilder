@@ -41,21 +41,27 @@ const InputField = ({
   errors,
 }: InputFieldProps) => (
   <div>
-    <label className="block text-sm font-medium text-gray-900">{label}</label>
+    <label className="block text-sm font-medium text-gray-900" htmlFor={name}>
+      {label}
+    </label>
     <Controller
       name={name}
       control={control}
       render={({ field }) => (
         <input
           {...field}
+          id={name}
           type={type}
           className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 shadow-sm focus:outline-indigo-600"
           autoComplete={type === "password" ? "new-password" : "off"}
+          aria-invalid={!!errors[name]}
         />
       )}
     />
     {errors[name]?.message && (
-      <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>
+      <p className="text-red-700 text-sm mt-1" role="alert" aria-live="polite">
+        {errors[name].message}
+      </p>
     )}
   </div>
 );
@@ -70,7 +76,9 @@ const PasswordStrengthMeter = ({ password }: { password: string }) => {
       ? "text-yellow-600"
       : "text-red-600";
   return password ? (
-    <p className={`mt-1 text-sm ${color}`}>Password Strength: {strength}</p>
+    <p className={`mt-1 text-sm ${color}`} aria-live="polite">
+      Password Strength: {strength}
+    </p>
   ) : null;
 };
 
@@ -108,7 +116,7 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <main className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <Image
           alt="CVBuilder Logo"
@@ -122,17 +130,25 @@ export default function Register() {
           Create an account
         </h2>
       </div>
+
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         {!!errorMessage && (
-          <div className="bg-red-100 text-red-700 p-3 rounded-md text-center mb-4">
+          <div
+            className="bg-red-100 text-red-700 p-3 rounded-md text-center mb-4"
+            role="alert"
+          >
             {errorMessage}
           </div>
         )}
         {!!successMessage && (
-          <div className="bg-green-100 text-green-700 p-3 rounded-md text-center mb-4">
+          <div
+            className="bg-green-100 text-green-700 p-3 rounded-md text-center mb-4"
+            role="alert"
+          >
             {successMessage}
           </div>
         )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <InputField
             label="First Name"
@@ -170,6 +186,7 @@ export default function Register() {
             control={control}
             errors={errors}
           />
+
           <button
             type="submit"
             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500"
@@ -182,6 +199,7 @@ export default function Register() {
             )}
           </button>
         </form>
+
         <p className="mt-10 text-center text-sm text-gray-500">
           Already have an account?{" "}
           <Link
@@ -192,6 +210,6 @@ export default function Register() {
           </Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }
