@@ -1,5 +1,5 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
-import axios from '@/utils/api';
+import axios from '@/lib/apiClient';
 import { IRegisterPayload } from '@/types/RegisterTypes';
 
 interface RegisterResponse {
