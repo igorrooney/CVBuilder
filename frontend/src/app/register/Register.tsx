@@ -97,9 +97,10 @@ export default function Register() {
           router.push("/login");
         }, 2000);
       },
-      onError: (error: AxiosError<{ message?: string }>) => {
+      onError: (error: Error) => {
+        const axiosError = error as AxiosError<{ message?: string }>;
         setErrorMessage(
-          error.response?.data?.message ||
+          axiosError.response?.data?.message ||
             "An error occurred. Please try again."
         );
       },
