@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLogin } from "@/hooks/useAuth";
 import Link from "next/link";
 import Image from "next/image";
+import { ILoginPayload } from "@/types/LoginTypes";
 
 const loginSchema = z.object({
   email: z
@@ -17,24 +18,38 @@ const loginSchema = z.object({
   password: z.string().nonempty("Password is required"),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
-
 export default function Login() {
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Store error message
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
+  } = useForm({
     resolver: zodResolver(loginSchema),
   });
 
   const loginMutation = useLogin();
 
-  const onSubmit = (data: LoginFormValues) => {
+  const onSubmit = (data: ILoginPayload) => {
+    setErrorMessage(null); // Reset previous errors
     loginMutation.mutate(data, {
       onSuccess: () => {
         router.push("/dashboard");
+      },
+      onError: (error) => {
+        const apiError = error as {
+          response?: { data?: { message?: string } };
+        };
+
+        if (apiError?.response?.data?.message) {
+          setErrorMessage(apiError.response.data.message);
+        } else if (error instanceof Error) {
+          setErrorMessage(error.message);
+        } else {
+          setErrorMessage("Login failed. Please try again.");
+        }
       },
     });
   };
@@ -44,7 +59,7 @@ export default function Login() {
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <Image
           alt="CVBuilder Logo"
-          src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" // Update this path to actual logo
+          src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
           width={50}
           height={50}
           className="mx-auto"
@@ -56,6 +71,12 @@ export default function Login() {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        {errorMessage && (
+          <div className="mb-4 p-2 text-center text-sm text-red-600 bg-red-100 rounded-md">
+            {errorMessage}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label
@@ -85,14 +106,6 @@ export default function Login() {
               >
                 Password
               </label>
-              {/* <div className="text-sm">
-                <Link
-                  href="/forgot-password"
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot password?
-                </Link>
-              </div> */}
             </div>
             <div className="mt-2">
               <input

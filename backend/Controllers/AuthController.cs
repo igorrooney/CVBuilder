@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Web;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -66,36 +67,18 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
-            return Unauthorized(new { message = "Invalid credentials" });
+            return StatusCode(403, new { message = "Invalid credentials" });
 
-        var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, false, false);
-        if (!result.Succeeded)
-            return Unauthorized(new { message = "Invalid credentials" });
+        var result = await _userManager.CheckPasswordAsync(user, model.Password);
+        if (!result)
+            return StatusCode(403, new { message = "Invalid credentials" });
 
-        // Generate the short-lived access token
         var accessToken = GenerateJwtToken(user);
-
-        // Generate a longer-lived refresh token, store in DB
         var refreshToken = await GenerateRefreshTokenAsync(user, HttpContext.Connection.RemoteIpAddress?.ToString());
-
-       // Check if environment is Development
-        var isDevelopment = _hostEnvironment.IsDevelopment();
-
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true, // Prevent JavaScript access
-            Secure = !isDevelopment, // In Development, set Secure=false
-            SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.None,
-            Path = "/",
-            Expires = DateTime.UtcNow.AddHours(1)
-        };
-
-        //Response.Cookies.Append("jwt", token, cookieOptions);
 
         return Ok(new { message = "Login successful!", accessToken, refreshToken });
     }
@@ -107,43 +90,49 @@ public class AuthController : ControllerBase
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // Add claims, including NameIdentifier
         var claims = new[]
         {
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Token ID
-        new Claim(ClaimTypes.NameIdentifier, user.Id), // Add user ID as NameIdentifier
-        new Claim(ClaimTypes.Email, user.Email), // Add email as Email claim
-        new Claim(ClaimTypes.Name, user.UserName) // Add username as Name claim
-    };
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.UserName)
+        };
 
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddDays(7),
-            //expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["TokenExpiryInMinutes"])),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     [HttpPost("logout")]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout([FromBody] LogoutRequestModel model)
     {
-        // Check if environment is Development
-        var isDevelopment = _hostEnvironment.IsDevelopment();
-        var cookieOptions = new CookieOptions
+        if (string.IsNullOrEmpty(model.RefreshToken))
         {
-            HttpOnly = true,
-            Secure = !isDevelopment, // In Development, set Secure=false
-            SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.None,
-            Path = "/",
-            Expires = DateTime.UtcNow.AddDays(-1)
-        };
-        Response.Cookies.Delete("jwt", cookieOptions);
+            return BadRequest(new { message = "Refresh token is required." });
+        }
+
+        // Decode the token before searching in DB
+        string decodedToken = HttpUtility.UrlDecode(model.RefreshToken);
+
+        var storedToken = await _context.RefreshTokens
+            .FirstOrDefaultAsync(r => r.Token == decodedToken);
+
+        if (storedToken == null)
+        {
+            return BadRequest(new { message = "Refresh token not found." });
+        }
+
+        _context.RefreshTokens.Remove(storedToken);
+        await _context.SaveChangesAsync();
 
         return Ok(new { message = "Logged out successfully" });
     }
+
 
 
     [HttpGet("me")]
@@ -181,7 +170,6 @@ public class AuthController : ControllerBase
 
     private async Task<string> GenerateRefreshTokenAsync(ApplicationUser user, string? ipAddress = null)
     {
-        // Create a secure random token (64 bytes)
         var randomNumber = new byte[64];
         using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
         {
@@ -193,7 +181,7 @@ public class AuthController : ControllerBase
         {
             Token = refreshTokenString,
             UserId = user.Id,
-            Expires = DateTime.UtcNow.AddDays(14), // 14-days refresh token
+            Expires = DateTime.UtcNow.AddDays(7),
             IsRevoked = false,
             CreatedAt = DateTime.UtcNow,
             CreatedByIp = ipAddress
@@ -211,38 +199,48 @@ public class AuthController : ControllerBase
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshRequestModel model)
     {
-        // Lookup the refresh token in the DB
-        var storedToken = await _context.RefreshTokens
-            .FirstOrDefaultAsync(r => r.Token == model.RefreshToken);
+        var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == model.RefreshToken);
+        if (storedToken == null || storedToken.IsRevoked || storedToken.Expires < DateTime.UtcNow)
+            return StatusCode(403, new { message = "Refresh token is no longer valid." });
 
-        if (storedToken == null)
-            return Unauthorized(new { message = "Invalid refresh token." });
+        var currentIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+        if (!IsIpInSameRange(storedToken.CreatedByIp, currentIp))
+            return StatusCode(403, new { message = "Invalid refresh token request." });
 
-        // Check if it's expired or revoked
-        if (storedToken.IsRevoked || storedToken.Expires < DateTime.UtcNow)
-            return Unauthorized(new { message = "Refresh token is no longer valid." });
-
-        // Revoke the old token so it can't be reused
         storedToken.IsRevoked = true;
         _context.RefreshTokens.Update(storedToken);
         await _context.SaveChangesAsync();
 
-        // Generate a new Access Token
         var user = await _userManager.FindByIdAsync(storedToken.UserId);
         if (user == null)
-            return Unauthorized(new { message = "User not found." });
+            return StatusCode(403, new { message = "User not found." });
 
         var newAccessToken = GenerateJwtToken(user);
-
-        // Also generate a brand-new refresh token
         var newRefreshToken = await GenerateRefreshTokenAsync(user);
 
-        return Ok(new
-        {
-            accessToken = newAccessToken,
-            refreshToken = newRefreshToken
-        });
+        return Ok(new { accessToken = newAccessToken, refreshToken = newRefreshToken });
     }
+
+    private bool IsIpInSameRange(string storedIp, string? currentIp)
+    {
+        if (string.IsNullOrEmpty(storedIp) || string.IsNullOrEmpty(currentIp))
+            return false;
+
+        var storedIpParts = storedIp.Split('.');
+        var currentIpParts = currentIp.Split('.');
+
+        if (storedIpParts.Length != 4 || currentIpParts.Length != 4)
+            return false;
+
+        // Check if first three octets (subnet) match
+        for (int i = 0; i < 3; i++)
+        {
+            if (storedIpParts[i] != currentIpParts[i])
+                return false;
+        }
+        return true;
+    }
+
     private async Task CleanupOldRefreshTokensAsync(string userId)
     {
         var userTokens = await _context.RefreshTokens
