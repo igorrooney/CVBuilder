@@ -44,6 +44,12 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        var existingUser = await _userManager.FindByEmailAsync(model.Email);
+        if (existingUser != null)
+        {
+            return BadRequest(new { message = "This email is already registered." });
+        }
+
         var user = new ApplicationUser
         {
             UserName = model.Email,
