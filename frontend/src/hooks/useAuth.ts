@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { LoginPayload } from "@/types/LoginTypes";
+import { ILoginPayload } from "@/types/LoginTypes";
 import apiClient from "@/lib/apiClient";
 
 export function useLogin() {
   return useMutation({
-    mutationFn: (data: LoginPayload) => {
+    mutationFn: (data: ILoginPayload) => {
       return apiClient.post("/auth/login", data);
     },
 
