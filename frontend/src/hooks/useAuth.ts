@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ILoginPayload } from "@/types/LoginTypes";
 import apiClient from "@/lib/apiClient";
+import { UserType } from "@/types/UserType";
 
 export function useLogin() {
   return useMutation({
@@ -35,13 +36,13 @@ export function useLogout() {
 }
 
 // Hook to fetch the current user's profile
-// The server can read the JWT from the cookie to identify the user.
 export function useCurrentUser() {
-  return useQuery({
+  return useQuery<UserType, Error>({
     queryKey: ["currentUser"],
     queryFn: async () => {
-      const response = await apiClient.get("/auth/me");
-      return response.data;
-    }
+      const { data } = await apiClient.get("/auth/me");
+      return data;
+    },
+    retry: false,
   });
 }

@@ -141,18 +141,11 @@ public class AuthController : ControllerBase
 
 
 
+    [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var token = Request.Cookies["accessToken"];
-        if (string.IsNullOrEmpty(token))
-        {
-            return Unauthorized(new { message = "User is not authenticated" });
-        }
-
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
-        var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userId))
         {
@@ -162,7 +155,7 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return Unauthorized(new { message = "User not found" });
+            return NotFound(new { message = "User not found" });
         }
 
         return Ok(new
