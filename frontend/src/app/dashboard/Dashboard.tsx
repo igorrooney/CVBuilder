@@ -1,9 +1,7 @@
 "use client";
 import { useLogout } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
-  const router = useRouter();
   const logoutMutation = useLogout();
 
   return (
@@ -14,7 +12,7 @@ export default function Dashboard() {
         onClick={() =>
           logoutMutation.mutate(undefined, {
             onSuccess: () => {
-              router.push("/login");
+              window.location.href = "/login";
             },
           })
         }

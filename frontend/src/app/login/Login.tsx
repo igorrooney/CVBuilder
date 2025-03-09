@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLogin } from "@/hooks/useAuth";
@@ -19,7 +18,6 @@ const loginSchema = z.object({
 });
 
 export default function Login() {
-  const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Store error message
 
   const {
@@ -36,7 +34,7 @@ export default function Login() {
     setErrorMessage(null); // Reset previous errors
     loginMutation.mutate(data, {
       onSuccess: () => {
-        router.push("/dashboard");
+        window.location.href = '/dashboard';
       },
       onError: (error) => {
         const apiError = error as {

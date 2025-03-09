@@ -1,60 +1,66 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  // Determine environment
   const isDevelopment = process.env.NODE_ENV === "development";
 
-  // Read the refresh token from the cookies
-  const refreshCookie = req.cookies.get("refreshToken")?.value;
-  if (!refreshCookie) {
+  // Extract refreshToken from cookies
+  const refreshToken = req.cookies.get("refreshToken")?.value;
+
+  if (!refreshToken) {
     return NextResponse.json(
-      { message: "No refresh token found." },
+      { message: "Refresh token not found." },
       { status: 401 }
     );
   }
 
-  // Forward the refresh token to your Azure backend
-  const azureResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken: refreshCookie }),
+  try {
+    // Forward the refresh token to your backend
+    const backendResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      }
+    );
+
+    if (!backendResponse.ok) {
+      const errorData = await backendResponse.json();
+      return NextResponse.json(
+        { message: errorData.message || "Refresh token invalid or expired." },
+        { status: backendResponse.status }
+      );
     }
-  );
 
-  // Handle error responses from Azure
-  if (!azureResponse.ok) {
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      await backendResponse.json();
+
+    const response = NextResponse.json({ message: "Refresh successful" });
+
+    // Set new Access Token cookie
+    response.cookies.set("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: !isDevelopment,
+      sameSite: isDevelopment ? "lax" : "none",
+      path: "/",
+      maxAge: 60 * 60, // 1 hour
+    });
+
+    // Set new Refresh Token cookie
+    response.cookies.set("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: !isDevelopment,
+      sameSite: isDevelopment ? "lax" : "none",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 14, // 14 days
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
     return NextResponse.json(
-      { message: "Refresh token is invalid or expired." },
-      { status: 401 }
+      { message: "Internal server error" },
+      { status: 500 }
     );
   }
-
-  // Parse the new tokens from Azure's response
-  const azureData = await azureResponse.json();
-  const { accessToken, refreshToken } = azureData;
-
-  // Create a NextResponse and set the new tokens in HTTP-only cookies
-  const response = NextResponse.json({ message: "Refresh successful" });
-
-  // Access token (short-lived)
-  response.cookies.set("accessToken", accessToken, {
-    httpOnly: true,
-    secure: !isDevelopment,
-    sameSite: isDevelopment ? "lax" : "none",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  });
-
-  // Refresh token (longer-lived)
-  response.cookies.set("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: !isDevelopment,
-    sameSite: isDevelopment ? "lax" : "none",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 14, // 14 days
-  });
-
-  return response;
 }
