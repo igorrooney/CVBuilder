@@ -6,13 +6,9 @@ interface LoginPayload {
 }
 
 export async function POST(req: NextRequest) {
-  const isDevelopment = process.env.NODE_ENV === "development";
-
-  // Parse the JSON body from the client request
   const body: LoginPayload = await req.json();
 
-  // Forward the credentials to the Azure backend
-  const azureResponse = await fetch(
+  const backendResponse = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
     {
       method: "POST",
@@ -21,35 +17,32 @@ export async function POST(req: NextRequest) {
     }
   );
 
-  // Handle potential errors from the Azure backend
-  if (!azureResponse.ok) {
-    const errorData = await azureResponse.json();
-    return NextResponse.json(errorData, { status: azureResponse.status });
+  if (!backendResponse.ok) {
+    const errorData = await backendResponse.json();
+    return NextResponse.json(errorData, { status: backendResponse.status });
   }
 
-  // Extract tokens (access + refresh) from Azure's response
-  const azureData = await azureResponse.json();
-  const { accessToken, refreshToken } = azureData;
+  const { accessToken, refreshToken } = await backendResponse.json();
 
-  // Create a NextResponse to send back to the client
   const response = NextResponse.json({ message: "Login successful" });
 
-  // Set an HTTP-only cookie for the ACCESS TOKEN (short-lived)
+  // Correctly handle development mode
+  const isDevelopment = process.env.NODE_ENV === "development";
+
   response.cookies.set("accessToken", accessToken, {
     httpOnly: true,
-    secure: !isDevelopment,            // Secure in prod
-    sameSite: isDevelopment ? "lax" : "none", // "none" requires HTTPS
+    secure: !isDevelopment, // false in dev, true in prod
+    sameSite: isDevelopment ? "lax" : "none", // lax in dev, none in prod
     path: "/",
-    maxAge: 60 * 60 * 24, // 1 day in seconds
+    maxAge: 60 * 60, // 1 hour
   });
 
-  // Set an HTTP-only cookie for the REFRESH TOKEN (longer-lived)
   response.cookies.set("refreshToken", refreshToken, {
     httpOnly: true,
     secure: !isDevelopment,
     sameSite: isDevelopment ? "lax" : "none",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+    maxAge: 60 * 60 * 24 * 14, // 14 days
   });
 
   return response;

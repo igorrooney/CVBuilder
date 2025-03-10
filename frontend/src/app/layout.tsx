@@ -2,6 +2,7 @@ import ClientProviders from "@/components/ClientProviders";
 import React from "react";
 import "./globals.css";
 import { Metadata } from "next";
+import Navbar from "@/components/UI/Navbar";
 
 export const metadata: Metadata = {
   title: {
@@ -44,19 +45,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <html lang="en">
       <head />
       <body>
         <ClientProviders>
-          <main role="main">
-            {children}
-          </main>
+          <Navbar />
+          <main role="main">{children}</main>
         </ClientProviders>
       </body>
     </html>
