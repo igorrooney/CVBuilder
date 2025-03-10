@@ -9,6 +9,9 @@ import { useRegister } from "@/hooks/useRegister";
 import Link from "next/link";
 import Image from "next/image";
 import { AxiosError } from "axios";
+import { Label } from "@/components/UI/label";
+import { Input } from "@/components/UI/input";
+import { Button } from "@/components/UI/button";
 
 const schema = z
   .object({
@@ -41,14 +44,14 @@ const InputField = ({
   errors,
 }: InputFieldProps) => (
   <div>
-    <label className="block text-sm font-medium text-gray-900" htmlFor={name}>
+    <Label className="block text-sm font-medium text-gray-900" htmlFor={name}>
       {label}
-    </label>
+    </Label>
     <Controller
       name={name}
       control={control}
       render={({ field }) => (
-        <input
+        <Input
           {...field}
           id={name}
           type={type}
@@ -196,7 +199,7 @@ export default function Register() {
             errors={errors}
           />
 
-          <button
+          <Button
             type="submit"
             className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500"
             aria-disabled={isLoading}
@@ -206,7 +209,7 @@ export default function Register() {
             ) : (
               "Sign up"
             )}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-10 text-center text-sm text-gray-500">
