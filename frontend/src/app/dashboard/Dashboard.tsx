@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/UI/button";
 import { useLogout } from "@/hooks/useAuth";
 
 export default function Dashboard() {
@@ -7,7 +8,7 @@ export default function Dashboard() {
   return (
     <>
       <h1 className="text-2xl font-bold">Welcome to your Dashboard</h1>
-      <button
+      <Button
         className="mt-4 bg-red-600 text-white p-2 rounded-md"
         onClick={() =>
           logoutMutation.mutate(undefined, {
@@ -18,7 +19,7 @@ export default function Dashboard() {
         }
       >
         Log out
-      </button>
+      </Button>
     </>
   );
 }

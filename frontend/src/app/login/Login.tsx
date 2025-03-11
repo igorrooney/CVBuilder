@@ -8,6 +8,9 @@ import { useLogin } from "@/hooks/useAuth";
 import Link from "next/link";
 import Image from "next/image";
 import { ILoginPayload } from "@/types/LoginTypes";
+import { Button } from "@/components/UI/button";
+import { Label } from "@/components/UI/label";
+import { Input } from "@/components/UI/input";
 
 const loginSchema = z.object({
   email: z
@@ -34,7 +37,7 @@ export default function Login() {
     setErrorMessage(null); // Reset previous errors
     loginMutation.mutate(data, {
       onSuccess: () => {
-        window.location.href = '/dashboard';
+        window.location.href = "/dashboard";
       },
       onError: (error) => {
         const apiError = error as {
@@ -77,14 +80,14 @@ export default function Login() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label
+            <Label
               htmlFor="email"
               className="block text-sm font-medium text-gray-900"
             >
               Email address
-            </label>
+            </Label>
             <div className="mt-2">
-              <input
+              <Input
                 id="email"
                 type="email"
                 {...register("email")}
@@ -98,15 +101,15 @@ export default function Login() {
 
           <div>
             <div className="flex items-center justify-between">
-              <label
+              <Label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-900"
               >
                 Password
-              </label>
+              </Label>
             </div>
             <div className="mt-2">
-              <input
+              <Input
                 id="password"
                 type="password"
                 {...register("password")}
@@ -121,13 +124,13 @@ export default function Login() {
           </div>
 
           <div>
-            <button
+            <Button
               type="submit"
               disabled={loginMutation.isPending}
               className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500"
             >
               {loginMutation.isPending ? "Logging in..." : "Sign in"}
-            </button>
+            </Button>
           </div>
         </form>
 
