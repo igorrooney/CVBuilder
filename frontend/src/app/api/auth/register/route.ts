@@ -1,4 +1,4 @@
-import { createAdminClient, createSessionClient } from '@/lib/appwrite';
+import { createAdminClient } from '@/lib/appwrite';
 import { SESSION_COOKIE } from '@/lib/server/const';
 import { IRegisterFormInputs } from '@/types/RegisterTypes';
 import { cookies } from 'next/headers';
@@ -13,12 +13,12 @@ export async function POST(req: Request) {
 		const user = await (
 			await createAdminClient()
 		).account.create(ID.unique(), email, password, fullName);
-		console.log('user :>> ', user);
+
 		// Automatically log in the user after signup
 		const session = await (
 			await createAdminClient()
 		).account.createEmailPasswordSession(email, password);
-		console.log('session :>> ', session);
+
 		// Store session securely in an HTTP-only cookie
 		(await cookies()).set(SESSION_COOKIE, session.$id, {
 			httpOnly: true,
