@@ -21,20 +21,31 @@ export async function POST(req: Request) {
 		}
 
 		const account = (await createAdminClient()).account;
-		const session = await account.createEmailPasswordSession(email, password);
 
-		// Set the session cookie correctly
-		(await cookies()).set(SESSION_COOKIE, session.secret, {
+		// ✅ DEBUG: Log Appwrite Response Before Parsing
+		const sessionResponse = await account.createEmailPasswordSession(email, password);
+		console.log('Appwrite Response:', sessionResponse);
+
+		// ✅ Check if sessionResponse contains valid JSON
+		if (!sessionResponse || !sessionResponse.secret) {
+			console.error('Appwrite Login Failed:', sessionResponse);
+			return NextResponse.json(
+				{ success: false, error: 'Invalid Appwrite response.' },
+				{ status: 500 },
+			);
+		}
+
+		(await cookies()).set(SESSION_COOKIE, sessionResponse.secret, {
 			httpOnly: true,
 			secure: true,
 			sameSite: 'strict',
-			expires: new Date(+session.expire * 1000), // Convert timestamp
+			expires: new Date(+sessionResponse.expire * 1000), // Ensure timestamp conversion
 			path: '/',
 		});
 
 		return NextResponse.json({ success: true });
 	} catch (e) {
 		console.error('Login error:', e); // Log error for debugging
-		return NextResponse.json({ success: false, error: (e as Error).message }, { status: 400 });
+		return NextResponse.json({ success: false, error: (e as Error).message }, { status: 500 });
 	}
 }
