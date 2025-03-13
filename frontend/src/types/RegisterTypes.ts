@@ -3,7 +3,6 @@ export interface IRegisterFormInputs {
     lastName: string;
     email: string;
     password: string;
-    confirmPassword: string;
   }
 
   export type IRegisterPayload = IRegisterFormInputs;

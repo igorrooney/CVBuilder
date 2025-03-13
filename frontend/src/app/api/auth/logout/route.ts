@@ -1,52 +1,18 @@
-import { NextResponse } from "next/server";
+import { createSessionClient } from '@/lib/server/appwrite';
+import { SESSION_COOKIE } from '@/lib/server/const';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
-  const isDevelopment = process.env.NODE_ENV === "development";
+export async function POST() {
+	try {
+		const { account } = await createSessionClient();
+		await account.deleteSession('current'); // Logout user session
 
-  // Extract refresh token from cookies
-  const refreshToken = request.headers
-    .get("cookie")
-    ?.split("; ")
-    .find((cookie) => cookie.startsWith("refreshToken="))
-    ?.split("=")[1];
+		// Remove session cookie
+		(await cookies()).delete(SESSION_COOKIE);
 
-  if (refreshToken) {
-    try {
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/logout`;
-
-      const response = await fetch(backendUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!response.ok) {
-        console.error("Backend logout failed:", await response.json());
-      }
-    } catch (error) {
-      console.error("Logout API error:", error);
-    }
-  }
-
-  const response = NextResponse.json({ message: "Logged out successfully" });
-
-  response.cookies.set("accessToken", "", {
-    httpOnly: true,
-    secure: !isDevelopment,
-    sameSite: isDevelopment ? "lax" : "none",
-    path: "/",
-    expires: new Date(0),
-  });
-
-  response.cookies.set("refreshToken", "", {
-    httpOnly: true,
-    secure: !isDevelopment,
-    sameSite: isDevelopment ? "lax" : "none",
-    path: "/",
-    expires: new Date(0),
-  });
-
-  return response;
+		return NextResponse.json({ success: true });
+	} catch (error) {
+		return NextResponse.json({ error: 'Failed to log out' }, { status: 500 });
+	}
 }
