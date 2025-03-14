@@ -1,49 +1,51 @@
-import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from '@/lib/appwrite';
+import { SESSION_COOKIE } from '@/lib/server/const';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
 interface LoginPayload {
-  email: string;
-  password: string;
+	email: string;
+	password: string;
 }
 
-export async function POST(req: NextRequest) {
-  const body: LoginPayload = await req.json();
+export async function POST(req: Request) {
+	try {
+		const body = await req.json();
+		const { email, password }: LoginPayload = body;
 
-  const backendResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }
-  );
+		if (!email || !password) {
+			return NextResponse.json(
+				{ success: false, error: 'Email and password are required.' },
+				{ status: 400 },
+			);
+		}
 
-  if (!backendResponse.ok) {
-    const errorData = await backendResponse.json();
-    return NextResponse.json(errorData, { status: backendResponse.status });
-  }
+		const account = (await createAdminClient()).account;
 
-  const { accessToken, refreshToken } = await backendResponse.json();
+		// ✅ DEBUG: Log Appwrite Response Before Parsing
+		const sessionResponse = await account.createEmailPasswordSession(email, password);
+		console.log('Appwrite Response:', sessionResponse);
 
-  const response = NextResponse.json({ message: "Login successful" });
+		// ✅ Check if sessionResponse contains valid JSON
+		if (!sessionResponse || !sessionResponse.secret) {
+			console.error('Appwrite Login Failed:', sessionResponse);
+			return NextResponse.json(
+				{ success: false, error: 'Invalid Appwrite response.' },
+				{ status: 500 },
+			);
+		}
 
-  // Correctly handle development mode
-  const isDevelopment = process.env.NODE_ENV === "development";
+		(await cookies()).set(SESSION_COOKIE, sessionResponse.secret, {
+			httpOnly: true,
+			secure: true,
+			sameSite: 'strict',
+			expires: new Date(+sessionResponse.expire * 1000), // Ensure timestamp conversion
+			path: '/',
+		});
 
-  response.cookies.set("accessToken", accessToken, {
-    httpOnly: true,
-    secure: !isDevelopment, // false in dev, true in prod
-    sameSite: isDevelopment ? "lax" : "none", // lax in dev, none in prod
-    path: "/",
-    maxAge: 60 * 60, // 1 hour
-  });
-
-  response.cookies.set("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: !isDevelopment,
-    sameSite: isDevelopment ? "lax" : "none",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 14, // 14 days
-  });
-
-  return response;
+		return NextResponse.json({ success: true });
+	} catch (e) {
+		console.error('Login error:', e); // Log error for debugging
+		return NextResponse.json({ success: false, error: (e as Error).message }, { status: 500 });
+	}
 }

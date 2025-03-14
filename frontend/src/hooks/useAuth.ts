@@ -1,48 +1,47 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { ILoginPayload } from "@/types/LoginTypes";
-import apiClient from "@/lib/apiClient";
-import { UserType } from "@/types/UserType";
+import apiClient from '@/lib/apiClient';
+import { createSessionClient } from '@/lib/server/appwrite';
+import { ILoginPayload } from '@/types/LoginTypes';
+import { UserType } from '@/types/UserType';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 
 export function useLogin() {
-  return useMutation({
-    mutationFn: (data: ILoginPayload) => {
-      return apiClient.post("/auth/login", data);
-    },
+	return useMutation({
+		mutationFn: (data: ILoginPayload) => {
+			return apiClient.post('/auth/login', data);
+		},
 
-    onSuccess: () => {
-      console.log("Login successful!");
-    },
+		onSuccess: () => {
+			console.log('Login successful!');
+		},
 
-    onError: (error) => {
-      console.error("Login failed:", error);
-    },
-  });
+		onError: (error) => {
+			console.error('Login failed:', error);
+		},
+	});
+}
+
+export function useLoggedInUser({ initialData }: { initialData?: any }) {
+	return useQuery({
+		queryKey: ['loggedUser'],
+		queryFn: async () => {
+			const { account } = await createSessionClient();
+			return await account.get(); // Fetch user from Appwrite
+		},
+		initialData,
+		staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+	});
 }
 
 export function useLogout() {
-  return useMutation({
-    mutationFn: () => {
-      return apiClient.post("/auth/logout");
-    },
+	const queryClient = useQueryClient();
 
-    onSuccess: () => {
-      console.log("Logged out successfully!");
-    },
-
-    onError: (error) => {
-      console.error("Logged out failed:", error);
-    },
-  });
-}
-
-// Hook to fetch the current user's profile
-export function useCurrentUser() {
-  return useQuery<UserType, Error>({
-    queryKey: ["currentUser"],
-    queryFn: async () => {
-      const { data } = await apiClient.get("/auth/me");
-      return data;
-    },
-    retry: false,
-  });
+	return useMutation({
+		mutationFn: async () => {
+			await axios.post('/api/auth/logout', {}, { withCredentials: true });
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['loggedUser'] }); // Invalidate cache so UI updates
+		},
+	});
 }
