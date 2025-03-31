@@ -4,10 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { appwriteConfig } from '@/lib/appwrite/config';
 import { useMutation } from '@tanstack/react-query';
 import { Account, Client } from 'appwrite';
-import { useRouter } from 'next/navigation';
 
 export const useLogout = () => {
-	const router = useRouter();
 	const { setSession } = useAuth();
 
 	const mutation = useMutation<void, unknown, void>({
@@ -22,7 +20,7 @@ export const useLogout = () => {
 		onSuccess: () => {
 			// Clear the authentication context and redirect
 			setSession(null);
-			router.push('/login');
+			window.location.href = '/login'; // Redirect to the login page after successful logout
 		},
 		onError: (error) => {
 			console.error('Error logging out:', error);

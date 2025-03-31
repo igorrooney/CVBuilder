@@ -26,8 +26,8 @@ const UserMenu = ({ user }: UserMenuProps) => {
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, []);
 
-	const handleLogout = async () => {
-		await logout();
+	const handleLogout = () => {
+		logout();
 	};
 
 	const firstName = user?.name.split(' ')[0] || '';

@@ -21,5 +21,9 @@ export function useLogin() {
 			const user = await account.get();
 			return user;
 		},
+		onSuccess: (user) => {
+			console.log('Login successful:', user);
+			window.location.href = '/'; // Redirect to the home page after successful login
+		},
 	});
 }

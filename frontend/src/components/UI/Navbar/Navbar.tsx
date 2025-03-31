@@ -4,6 +4,7 @@
 import MobileNav from '@/components/MobileNav';
 import UserMenu from '@/components/UserMenu';
 import { useLoggedInUser } from '@/hooks/useLoggedInUser';
+import { Box, CircularProgress } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -11,6 +12,20 @@ import { Suspense } from 'react';
 export default function Navbar() {
 	const { user, isLoading } = useLoggedInUser();
 
+	if (isLoading) {
+		return (
+			<Box
+				sx={{
+					height: '100vh',
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+				}}
+			>
+				<CircularProgress size={60} />
+			</Box>
+		);
+	}
 	return (
 		<header className="relative bg-white shadow-md dark:bg-gray-800" aria-label="Main Navigation">
 			<nav className="border-gray-200 px-4 py-2.5 lg:px-6">
@@ -32,9 +47,7 @@ export default function Navbar() {
 
 					{/* Right-hand side */}
 					<div className="flex items-center lg:order-2">
-						{isLoading ? (
-							<div>Loading user...</div>
-						) : user ? (
+						{user ? (
 							<UserMenu user={user} />
 						) : (
 							<>
