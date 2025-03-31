@@ -1,5 +1,6 @@
 'use client';
 
+import { useCreateCV } from '@/hooks/useCreateCV';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	Box,
@@ -20,8 +21,9 @@ import { FormData, schema } from './parts/schema/schema';
 import { stepFieldGroups, steps } from './parts/steps/steps';
 import WorkExperienceItem from './parts/WorkExperienceItem/WorkExperienceItem';
 
-export default function CVCreationForm() {
+const CVCreationForm = () => {
 	const [activeStep, setActiveStep] = useState(0);
+	const { createCV, isError, error, isSuccess } = useCreateCV();
 
 	const {
 		control,
@@ -50,7 +52,7 @@ export default function CVCreationForm() {
 				},
 			],
 			education: [{ institution: '', degree: '', graduationYear: '' }],
-			skills: [''],
+			skills: '',
 			hobbies: '',
 		},
 		mode: 'onChange',
@@ -99,8 +101,8 @@ export default function CVCreationForm() {
 
 	// Final form submission
 	const onSubmit = (data: FormData) => {
-		console.log('Submitted Data:', data);
-		// Further processing such as sending data to backend can be done here.
+		console.log('data :>> ', data);
+		createCV(data);
 	};
 
 	// Render content for each step
@@ -224,6 +226,7 @@ export default function CVCreationForm() {
 						<Typography variant="h6" id="skills-hobbies-heading" gutterBottom>
 							Skills & Hobbies
 						</Typography>
+						{/* Skills field now remains a string */}
 						<Controller
 							name="skills"
 							control={control}
@@ -235,13 +238,6 @@ export default function CVCreationForm() {
 									margin="normal"
 									error={!!errors.skills}
 									helperText={errors.skills?.message || 'Enter skills separated by commas'}
-									onBlur={(e) => {
-										const value = e.target.value
-											.split(',')
-											.map((item) => item.trim())
-											.filter((item) => item);
-										field.onChange(value);
-									}}
 									inputProps={{ 'aria-label': 'Skills' }}
 								/>
 							)}
@@ -324,4 +320,6 @@ export default function CVCreationForm() {
 			</main>
 		</>
 	);
-}
+};
+
+export default CVCreationForm;

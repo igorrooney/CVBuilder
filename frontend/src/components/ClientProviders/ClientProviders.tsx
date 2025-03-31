@@ -1,5 +1,6 @@
 'use client';
 
+import { AuthProvider } from '@/contexts/AuthContext';
 import theme from '@/theme';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
@@ -14,7 +15,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
 			<QueryClientProvider client={queryClient}>
-				{children}
+				<AuthProvider>{children}</AuthProvider>
 				<ReactQueryDevtools initialIsOpen={false} />
 			</QueryClientProvider>
 		</ThemeProvider>

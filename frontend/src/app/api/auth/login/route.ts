@@ -1,7 +1,8 @@
-import { createAdminClient } from '@/lib/appwrite';
-import { SESSION_COOKIE } from '@/lib/server/const';
-import { cookies } from 'next/headers';
+// File: app/api/login/route.ts
+import { Client, Account } from 'node-appwrite';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { appwriteConfig } from '@/lib/appwrite/config';
 
 interface LoginPayload {
 	email: string;
@@ -10,8 +11,8 @@ interface LoginPayload {
 
 export async function POST(req: Request) {
 	try {
-		const body = await req.json();
-		const { email, password }: LoginPayload = body;
+		const body = (await req.json()) as LoginPayload;
+		const { email, password } = body;
 
 		if (!email || !password) {
 			return NextResponse.json(
@@ -20,32 +21,39 @@ export async function POST(req: Request) {
 			);
 		}
 
-		const account = (await createAdminClient()).account;
+		// 1) Initialize an Appwrite client
+		const client = new Client()
+			.setEndpoint(appwriteConfig.endpointUrl) // from .env
+			.setProject(appwriteConfig.projectId); // from .env
 
-		// ✅ DEBUG: Log Appwrite Response Before Parsing
+		const account = new Account(client);
+
+		// 2) Validate user credentials (creates a session in Appwrite)
 		const sessionResponse = await account.createEmailPasswordSession(email, password);
-		console.log('Appwrite Response:', sessionResponse);
 
-		// ✅ Check if sessionResponse contains valid JSON
-		if (!sessionResponse || !sessionResponse.secret) {
-			console.error('Appwrite Login Failed:', sessionResponse);
-			return NextResponse.json(
-				{ success: false, error: 'Invalid Appwrite response.' },
-				{ status: 500 },
-			);
+		// 3) Generate a JWT for this user
+		const jwtResponse = await account.createJWT();
+
+		// 4) Check that JWT is valid
+		if (!jwtResponse.jwt) {
+			return NextResponse.json({ success: false, error: 'Failed to create JWT.' }, { status: 500 });
 		}
 
-		(await cookies()).set(SESSION_COOKIE, sessionResponse.secret, {
+		// 5) Store the JWT in a secure HTTP-only cookie
+		// The cookie name is defined in your .env as SESSION_COOKIE
+		const cookieName = process.env.SESSION_COOKIE || 'appwriteJWT';
+		(await cookies()).set(cookieName, jwtResponse.jwt, {
 			httpOnly: true,
-			secure: true,
+			secure: true, // Use HTTPS in production
 			sameSite: 'strict',
-			expires: new Date(+sessionResponse.expire * 1000), // Ensure timestamp conversion
 			path: '/',
+			// Optional: set an expiration if desired
+			// expires: new Date(Date.now() + 1000 * 60 * 60) // 1 hour
 		});
 
 		return NextResponse.json({ success: true });
 	} catch (e) {
-		console.error('Login error:', e); // Log error for debugging
+		console.error('Login error:', e);
 		return NextResponse.json({ success: false, error: (e as Error).message }, { status: 500 });
 	}
 }

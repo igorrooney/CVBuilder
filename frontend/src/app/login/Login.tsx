@@ -3,11 +3,13 @@
 import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
 import { Label } from '@/components/UI/label';
-import { useLogin } from '@/hooks/useAuth';
+import { useLogin } from '@/hooks/useLogin';
 import { ILoginPayload } from '@/types/LoginTypes';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -18,38 +20,25 @@ const loginSchema = z.object({
 });
 
 export default function Login() {
-	const [errorMessage, setErrorMessage] = useState<string | null>(null); // Store error message
+	const router = useRouter();
+	const queryClient = useQueryClient();
+
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm({
+	} = useForm<ILoginPayload>({
 		resolver: zodResolver(loginSchema),
 	});
 
+	// Destructure the mutate function (login) and loading state
 	const loginMutation = useLogin();
 
 	const onSubmit = (data: ILoginPayload) => {
-		setErrorMessage(null); // Reset previous errors
-		loginMutation.mutate(data, {
-			onSuccess: () => {
-				window.location.href = '/dashboard';
-			},
-			onError: (error) => {
-				const apiError = error as {
-					response?: { data?: { message?: string } };
-				};
-
-				if (apiError?.response?.data?.message) {
-					setErrorMessage(apiError.response.data.message);
-				} else if (error instanceof Error) {
-					setErrorMessage(error.message);
-				} else {
-					setErrorMessage('Login failed. Please try again.');
-				}
-			},
-		});
+		setErrorMessage(null); // Clear any previous error message
+		loginMutation.mutate(data);
 	};
 
 	return (

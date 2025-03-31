@@ -38,7 +38,7 @@ export const schema = z.object({
 		)
 		.min(1, 'At least one education entry is required'),
 
-	skills: z.array(z.string()).min(1, 'At least one skill is required'),
+	skills: z.string().min(1, 'At least one skill is required'),
 	hobbies: z.string().optional(),
 });
 
