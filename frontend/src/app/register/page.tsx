@@ -1,10 +1,5 @@
 import { Metadata } from 'next';
 import Register from './Register';
-import { createAdminClient } from '@/lib/server/appwrite';
-import { ID } from 'node-appwrite';
-import { cookies } from 'next/headers';
-import { SESSION_COOKIE } from '@/lib/server/const';
-import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
 	title: 'Register',

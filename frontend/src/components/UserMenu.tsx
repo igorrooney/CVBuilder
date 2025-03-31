@@ -1,19 +1,20 @@
+// components/UserMenu.tsx
 'use client';
 
-import { useLoggedInUser, useLogout } from '@/hooks/useAuth';
-import { ILoggedUser } from '@/types/LoginTypes';
-import { UserType } from '@/types/UserType';
+import { useLogout } from '@/hooks/useLogout';
+import { Models } from 'appwrite';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Models } from 'node-appwrite';
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const UserMenu = ({ initialData }: { initialData: ILoggedUser }) => {
+interface UserMenuProps {
+	user: Models.User<Models.Preferences>;
+}
+
+const UserMenu = ({ user }: UserMenuProps) => {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
-	const logoutMutation = useLogout();
 	const dropdownRef = useRef<HTMLDivElement>(null);
-
-	const { data: user } = useLoggedInUser({ initialData });
+	const { logout } = useLogout();
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
@@ -21,43 +22,30 @@ const UserMenu = ({ initialData }: { initialData: ILoggedUser }) => {
 				setDropdownOpen(false);
 			}
 		};
-
 		document.addEventListener('mousedown', handleClickOutside);
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
+		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, []);
 
-	async function handleLogout() {
-		logoutMutation.mutate(undefined, {
-			onSuccess: () => {
-				window.location.href = '/login';
-			},
-			onError: () => {
-				console.error('Logout failed');
-			},
-		});
-	}
+	const handleLogout = () => {
+		logout();
+	};
 
-	const firstName = user.name.split(' ')[0];
-	const lastName = user.name.split(' ')[1];
-
-	const profilePictureUrl = user.prefs?.profilePictureUrl;
-
+	const firstName = user?.name.split(' ')[0] || '';
+	const lastName = user?.name.split(' ')[1] || '';
+	const profilePictureUrl = user?.prefs?.profilePictureUrl;
 	const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
 
 	return (
 		<div className="relative inline-block text-left" ref={dropdownRef}>
 			<button
 				onClick={() => setDropdownOpen((prev) => !prev)}
-				className="inline-flex items-center rounded-lg !bg-white p-2 text-sm text-gray-800 hover:bg-gray-100 focus:outline-none"
+				className="inline-flex items-center rounded-lg bg-white p-2 text-sm text-gray-800 hover:bg-gray-100 focus:outline-none"
 			>
 				{profilePictureUrl ? (
 					<Image
 						src={profilePictureUrl}
-						className="h-10 w-10 rounded-full"
 						alt="User avatar"
+						className="h-10 w-10 rounded-full"
 						width={40}
 						height={40}
 					/>
@@ -67,12 +55,11 @@ const UserMenu = ({ initialData }: { initialData: ILoggedUser }) => {
 					</div>
 				)}
 			</button>
-
 			{dropdownOpen && (
 				<div className="absolute right-0 z-10 mt-2 w-56 rounded-lg border bg-white shadow-xl">
 					<div className="border-b px-4 py-3">
-						<span className="block text-sm font-semibold text-gray-900">{user.name}</span>
-						<span className="block truncate text-sm text-gray-500">{user.email}</span>
+						<span className="block text-sm font-semibold text-gray-900">{user?.name}</span>
+						<span className="block truncate text-sm text-gray-500">{user?.email}</span>
 					</div>
 					<ul className="py-2 text-gray-700">
 						<li>
@@ -83,7 +70,7 @@ const UserMenu = ({ initialData }: { initialData: ILoggedUser }) => {
 						<li>
 							<button
 								onClick={handleLogout}
-								className="w-full !bg-white px-4 py-2 text-left !text-gray-700 hover:!bg-gray-100"
+								className="w-full bg-white px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
 							>
 								Sign out
 							</button>

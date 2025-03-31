@@ -1,13 +1,31 @@
+// components/UI/Navbar.tsx
+'use client';
+
 import MobileNav from '@/components/MobileNav';
 import UserMenu from '@/components/UserMenu';
-import { getLoggedInUser } from '@/lib/server/appwrite';
+import { useLoggedInUser } from '@/hooks/useLoggedInUser';
+import { Box, CircularProgress } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-export default async function Navbar() {
-	const loggedUser = await getLoggedInUser();
+export default function Navbar() {
+	const { user, isLoading } = useLoggedInUser();
 
+	if (isLoading) {
+		return (
+			<Box
+				sx={{
+					height: '100vh',
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+				}}
+			>
+				<CircularProgress size={60} />
+			</Box>
+		);
+	}
 	return (
 		<header className="relative bg-white shadow-md dark:bg-gray-800" aria-label="Main Navigation">
 			<nav className="border-gray-200 px-4 py-2.5 lg:px-6">
@@ -20,17 +38,17 @@ export default async function Navbar() {
 							alt="CV Builder Logo"
 							width={36}
 							height={36}
-							priority={true}
+							priority
 						/>
 						<span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
 							CV Builder
 						</span>
 					</Link>
 
-					{/* Right-hand side (Log in / User menu / Mobile toggler) */}
+					{/* Right-hand side */}
 					<div className="flex items-center lg:order-2">
-						{loggedUser ? (
-							<UserMenu initialData={loggedUser} />
+						{user ? (
+							<UserMenu user={user} />
 						) : (
 							<>
 								<Link
@@ -48,13 +66,13 @@ export default async function Navbar() {
 							</>
 						)}
 
-						{/* Mobile Nav Toggler (client component) */}
-						<Suspense fallback={<div>Loading...</div>}>
+						{/* Mobile Nav Toggler */}
+						<Suspense fallback={<div>Loading mobile nav...</div>}>
 							<MobileNav />
 						</Suspense>
 					</div>
 
-					{/* Desktop Nav (visible on large screens) */}
+					{/* Desktop Nav */}
 					<div className="hidden lg:order-1 lg:flex lg:w-auto">
 						<ul className="mt-4 flex flex-col font-medium lg:mt-0 lg:flex-row lg:space-x-8">
 							<li>
