@@ -21,10 +21,6 @@ interface LoginError extends Error {
 	};
 }
 
-function isValidPath(path: string): boolean {
-	return path.startsWith('/') && !path.includes('://') && !path.includes('//');
-}
-
 export function useLogin() {
 	const { setSession } = useAuth();
 

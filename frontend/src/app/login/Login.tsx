@@ -5,7 +5,6 @@ import { Input } from '@/components/UI/input';
 import { Label } from '@/components/UI/label';
 import { useLogin } from '@/hooks/useLogin';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -26,7 +25,6 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
-	const queryClient = useQueryClient();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -83,7 +81,7 @@ export default function Login() {
 			setErrorMessage(null);
 			console.log('Starting login process');
 
-			const result = await loginMutation.mutateAsync({
+			await loginMutation.mutateAsync({
 				email: data.email,
 				password: data.password,
 			});

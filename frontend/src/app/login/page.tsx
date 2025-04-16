@@ -1,8 +1,5 @@
 import { Metadata, Viewport } from 'next';
-import dynamic from 'next/dynamic';
-
-// Import the Login component with no SSR to ensure it runs only on the client
-const Login = dynamic(() => import('./Login'), { ssr: false });
+import ClientPage from './ClientPage';
 
 export const viewport: Viewport = {
 	width: 'device-width',
@@ -21,5 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-	return <Login />;
+	return <ClientPage />;
 }

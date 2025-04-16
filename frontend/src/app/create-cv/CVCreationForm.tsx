@@ -11,6 +11,7 @@ import {
 	Stepper,
 	TextField,
 	Typography,
+	Alert,
 } from '@mui/material';
 import Head from 'next/head';
 import { useState } from 'react';
@@ -280,41 +281,47 @@ const CVCreationForm = () => {
 				/>
 			</Head>
 			<main role="main" aria-label="CV Creation Form">
-				<Container maxWidth="md">
+				<Container maxWidth="md" sx={{ py: 4 }}>
+					{isError && (
+						<Alert severity="error" sx={{ mb: 2 }}>
+							{error instanceof Error ? error.message : 'An error occurred while creating your CV'}
+						</Alert>
+					)}
+					{isSuccess && (
+						<Alert severity="success" sx={{ mb: 2 }}>
+							CV created successfully!
+						</Alert>
+					)}
+					<header>
+						<Typography variant="h1" component="h1" sx={{ fontSize: '2rem', mb: 2 }}>
+							Create Your CV
+						</Typography>
+					</header>
+					<Stepper activeStep={activeStep} alternativeLabel>
+						{steps.map((label, index) => (
+							<Step key={label}>
+								<StepButton onClick={() => handleStepClick(index)}>{label}</StepButton>
+							</Step>
+						))}
+					</Stepper>
 					<Box sx={{ mt: 4 }}>
-						<header>
-							<Typography variant="h1" component="h1" sx={{ fontSize: '2rem', mb: 2 }}>
-								Create Your CV
-							</Typography>
-						</header>
-						<Stepper activeStep={activeStep} alternativeLabel>
-							{steps.map((label, index) => (
-								<Step key={label}>
-									<StepButton onClick={() => handleStepClick(index)}>{label}</StepButton>
-								</Step>
-							))}
-						</Stepper>
-						<Box sx={{ mt: 4 }}>
-							<form onSubmit={handleSubmit(onSubmit)}>
-								{renderStepContent(activeStep)}
-								<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-									{activeStep > 0 && (
-										<Button variant="outlined" onClick={handleBack}>
-											Back
-										</Button>
-									)}
-									{activeStep < steps.length - 1 ? (
-										<Button variant="contained" onClick={handleNext}>
-											Next
-										</Button>
-									) : (
-										<Button variant="contained" type="submit">
-											Submit
-										</Button>
-									)}
-								</Box>
-							</form>
-						</Box>
+						<form onSubmit={handleSubmit(onSubmit)}>
+							{renderStepContent(activeStep)}
+							<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+								<Button disabled={activeStep === 0} onClick={handleBack}>
+									Back
+								</Button>
+								{activeStep === steps.length - 1 ? (
+									<Button variant="contained" type="submit">
+										Submit
+									</Button>
+								) : (
+									<Button variant="contained" onClick={handleNext}>
+										Next
+									</Button>
+								)}
+							</Box>
+						</form>
 					</Box>
 				</Container>
 			</main>

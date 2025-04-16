@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// List of public routes that don't require authentication
-const publicRoutes = ['/login', '/register', '/forgot-password'];
-
 // List of auth routes that should redirect to home if user is already authenticated
 const authRoutes = ['/login', '/register'];
 

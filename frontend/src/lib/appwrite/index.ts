@@ -1,7 +1,7 @@
 'use server';
 import { appwriteConfig } from '@/lib/appwrite/config';
 import { cookies } from 'next/headers';
-import { Account, Avatars, Client, Databases, ID } from 'node-appwrite';
+import { Account, Avatars, Client, Databases } from 'node-appwrite';
 
 // Create a reusable client instance for sessions
 const sessionClient = new Client()
