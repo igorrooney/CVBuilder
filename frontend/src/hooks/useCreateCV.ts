@@ -4,6 +4,33 @@ import { useMutation } from '@tanstack/react-query';
 import { Client, Databases, Account, Models, ID } from 'appwrite';
 import { appwriteConfig } from '@/lib/appwrite/config';
 import { FormData } from '@/app/create-cv/parts/schema/schema';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+export interface CVCreationFormData {
+	firstName: string;
+	lastName: string;
+	email: string;
+	phoneNumber: string;
+	address: string;
+	summary: string;
+	skills: string[];
+	hobbies: string[];
+	experience: {
+		jobTitle: string;
+		company: string;
+		startDate: string;
+		endDate: string;
+		responsibilities: string[];
+		achievements: string[];
+		isCurrent: boolean;
+	}[];
+	education: {
+		degree: string;
+		institution: string;
+		graduationYear: string;
+	}[];
+}
 
 export interface CreateCVResult {
 	cv: Models.Document;
@@ -11,78 +38,73 @@ export interface CreateCVResult {
 	educationDocs: Models.Document[];
 }
 
-export const useCreateCV = () => {
-	const mutation = useMutation<CreateCVResult, unknown, FormData>({
-		mutationFn: async (payload: FormData) => {
-			// Create and configure the Appwrite client
+export function useCreateCV() {
+	const [showSuccess, setShowSuccess] = useState(false);
+	const [notification, setNotification] = useState({
+		open: false,
+		message: '',
+		severity: 'success' as 'success' | 'error' | 'warning' | 'info',
+	});
+	const router = useRouter();
+
+	const {
+		mutate: createCV,
+		isError,
+		error,
+		isSuccess,
+		isPending,
+	} = useMutation({
+		mutationFn: async (data: CVCreationFormData) => {
 			const client = new Client()
 				.setEndpoint(appwriteConfig.endpointUrl)
 				.setProject(appwriteConfig.projectId);
 
-			// Initialize Appwrite services
 			const account = new Account(client);
 			const databases = new Databases(client);
 
-			// Retrieve the current user to get the user ID
 			const user = await account.get();
-			const userId = user.$id;
-			if (!userId) {
-				throw new Error('Unauthorized: No active session');
-			}
+			if (!user) throw new Error('User not authenticated');
 
-			// Create the main CV document
 			const cv = await databases.createDocument(
 				appwriteConfig.databaseId,
 				appwriteConfig.cvsCollectionId,
 				ID.unique(),
 				{
-					userId,
-					firstName: payload.firstName,
-					lastName: payload.lastName,
-					email: payload.email,
-					phoneNumber: payload.phone,
-					address: payload.address,
-					summary: payload.summary,
-					skills: payload.skills,
-					hobbies: payload.hobbies,
-					experience: payload.experience, // optional duplicate storage in main doc
-					education: payload.education, // optional duplicate storage in main doc
+					userId: user.$id,
+					firstName: data.firstName,
+					lastName: data.lastName,
+					email: data.email,
+					phoneNumber: data.phoneNumber,
+					address: data.address,
+					summary: data.summary,
+					skills: data.skills,
+					hobbies: data.hobbies,
 				},
 			);
 
-			// Create work experience documents
 			const experienceDocs = await Promise.all(
-				payload.experience.map((job) =>
+				data.experience.map((exp) =>
 					databases.createDocument(
 						appwriteConfig.databaseId,
 						appwriteConfig.workExperiencesCollectionId,
 						ID.unique(),
 						{
 							cvId: cv.$id,
-							jobTitle: job.jobTitle,
-							company: job.company,
-							startDate: job.startDate,
-							endDate: job.endDate,
-							responsibilities: job.responsibilities,
-							achievements: job.achievements,
-							isCurrent: job.isCurrent,
+							...exp,
 						},
 					),
 				),
 			);
 
-			// Create education documents with graduationYear transformed to integer
 			const educationDocs = await Promise.all(
-				payload.education.map((edu) =>
+				data.education.map((edu) =>
 					databases.createDocument(
 						appwriteConfig.databaseId,
 						appwriteConfig.educationsCollectionId,
 						ID.unique(),
 						{
 							cvId: cv.$id,
-							degree: edu.degree,
-							institution: edu.institution,
-							graduationYear: edu.graduationYear,
+							...edu,
 						},
 					),
 				),
@@ -90,17 +112,37 @@ export const useCreateCV = () => {
 
 			return { cv, experienceDocs, educationDocs };
 		},
-		onSuccess: (data) => {
-			console.log('CV created successfully:', data);
-			// Add navigation or state updates here if needed
+		onSuccess: () => {
+			setShowSuccess(true);
+			setNotification({
+				open: true,
+				message: 'CV created successfully!',
+				severity: 'success',
+			});
+			router.push('/my-cvs');
 		},
-		onError: (error) => {
-			console.error('Error creating CV:', error);
+		onError: (error: Error) => {
+			setNotification({
+				open: true,
+				message: error.message || 'Failed to create CV',
+				severity: 'error',
+			});
 		},
 	});
 
-	return {
-		createCV: mutation.mutate,
-		...mutation,
+	const handleCloseNotification = () => {
+		setNotification((prev) => ({ ...prev, open: false }));
 	};
-};
+
+	return {
+		createCV,
+		isError,
+		error,
+		isSuccess,
+		showSuccess,
+		setShowSuccess,
+		isPending,
+		notification,
+		handleCloseNotification,
+	};
+}

@@ -11,7 +11,7 @@ export const steps = [
 
 type StepFields = FieldPath<FormData>[];
 export const stepFieldGroups: StepFields[] = [
-	['firstName', 'lastName', 'email', 'phone', 'address'],
+	['firstName', 'lastName', 'email', 'phoneNumber', 'address'],
 	['summary'],
 	['experience'],
 	['education'],

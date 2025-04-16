@@ -12,6 +12,8 @@ interface FormInputProps {
 	error?: boolean;
 	helperText?: string;
 	disabled?: boolean;
+	multiline?: boolean;
+	rows?: number;
 	[x: string]: any;
 }
 
@@ -25,6 +27,8 @@ const FormInput: React.FC<FormInputProps> = ({
 	error,
 	helperText,
 	disabled,
+	multiline,
+	rows,
 	...rest
 }) => {
 	return (
@@ -41,7 +45,44 @@ const FormInput: React.FC<FormInputProps> = ({
 					error={error}
 					helperText={helperText}
 					disabled={disabled}
-					inputProps={{ 'aria-label': label, ...rest.inputProps }}
+					multiline={multiline}
+					rows={rows}
+					variant="outlined"
+					sx={{
+						'& .MuiOutlinedInput-root': {
+							'& fieldset': {
+								borderColor: 'rgba(0, 0, 0, 0.12)',
+							},
+							'&:hover fieldset': {
+								borderColor: 'primary.main',
+							},
+							'&.Mui-focused fieldset': {
+								borderColor: 'primary.main',
+								borderWidth: '2px',
+							},
+						},
+						'& .MuiInputLabel-root': {
+							'color': 'text.secondary',
+							'&.Mui-focused': {
+								color: 'primary.main',
+							},
+						},
+						'& .MuiInputBase-input': {
+							'color': 'text.primary',
+							'&::placeholder': {
+								color: 'text.secondary',
+								opacity: 0.5,
+							},
+						},
+						'& .MuiFormHelperText-root': {
+							color: error ? 'error.main' : 'text.secondary',
+						},
+						'mb': 2,
+					}}
+					inputProps={{
+						'aria-label': label,
+						...rest.inputProps,
+					}}
 					{...rest}
 				/>
 			)}
