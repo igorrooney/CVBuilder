@@ -1,44 +1,47 @@
 'use server';
 import { appwriteConfig } from '@/lib/appwrite/config';
 import { cookies } from 'next/headers';
-import { Account, Avatars, Client, Databases } from 'node-appwrite';
+import { Account, Avatars, Client, Databases, ID } from 'node-appwrite';
+
+// Create a reusable client instance for sessions
+const sessionClient = new Client()
+	.setEndpoint(appwriteConfig.endpointUrl)
+	.setProject(appwriteConfig.projectId);
+
+// Create a separate client instance for admin operations
+const adminClient = new Client()
+	.setEndpoint(appwriteConfig.endpointUrl)
+	.setProject(appwriteConfig.projectId)
+	.setKey(appwriteConfig.secretKey);
 
 export const createSessionClient = async () => {
-	const client = new Client()
-		.setEndpoint(appwriteConfig.endpointUrl)
-		.setProject(appwriteConfig.projectId);
-
 	const session = (await cookies()).get('appwrite-session');
 
 	if (!session || !session.value) throw new Error('No session');
 
-	client.setSession(session.value);
+	// For server-side operations, we'll use the session cookie
+	sessionClient.setJWT(session.value);
 
 	return {
 		get account() {
-			return new Account(client);
+			return new Account(sessionClient);
 		},
 		get databases() {
-			return new Databases(client);
+			return new Databases(sessionClient);
 		},
 	};
 };
 
 export const createAdminClient = async () => {
-	const client = new Client()
-		.setEndpoint(appwriteConfig.endpointUrl)
-		.setProject(appwriteConfig.projectId)
-		.setKey(appwriteConfig.secretKey);
-
 	return {
 		get account() {
-			return new Account(client);
+			return new Account(adminClient);
 		},
 		get databases() {
-			return new Databases(client);
+			return new Databases(adminClient);
 		},
 		get avatars() {
-			return new Avatars(client);
+			return new Avatars(adminClient);
 		},
 	};
 };
