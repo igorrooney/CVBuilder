@@ -6,6 +6,7 @@ export const steps = [
 	'Professional Summary',
 	'Work Experience',
 	'Education',
+	'Certifications',
 	'Skills & Hobbies',
 ];
 
@@ -15,5 +16,6 @@ export const stepFieldGroups: StepFields[] = [
 	['summary'],
 	['experience'],
 	['education'],
+	['certifications'],
 	['skills', 'hobbies'],
 ];

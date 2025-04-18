@@ -31,6 +31,7 @@ import WorkExperienceItem from './parts/WorkExperienceItem/WorkExperienceItem';
 import Notification from '@/components/UI/Notification/Notification';
 import { useRouter } from 'next/navigation';
 import { Controller } from 'react-hook-form';
+import CertificationItem from './parts/CertificationItem';
 
 interface ErrorResponse {
 	message: string;
@@ -83,6 +84,16 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 				},
 			],
 			education: [{ institution: '', degree: '', graduationYear: '' }],
+			certifications: [
+				{
+					name: '',
+					issuingOrganization: '',
+					issueDate: '',
+					expiryDate: '',
+					credentialId: '',
+					credentialUrl: '',
+				},
+			],
 			skills: [],
 			hobbies: '',
 		},
@@ -105,6 +116,15 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 	} = useFieldArray({
 		control,
 		name: 'education',
+	});
+
+	const {
+		fields: certFields,
+		append: appendCert,
+		remove: removeCert,
+	} = useFieldArray({
+		control,
+		name: 'certifications',
 	});
 
 	// Validate current step fields before proceeding
@@ -307,6 +327,48 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 					</motion.div>
 				);
 			case 4:
+				return (
+					<motion.div
+						initial={{ opacity: 0, x: 20 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, x: -20 }}
+						transition={{ duration: 0.3 }}
+					>
+						<Box component="section" aria-labelledby="certifications-heading">
+							<Typography variant="h6" id="certifications-heading" gutterBottom>
+								Certifications
+							</Typography>
+							<Paper elevation={0} sx={{ p: 3, bgcolor: 'background.paper' }}>
+								{certFields.map((item, index) => (
+									<CertificationItem
+										key={item.id}
+										control={control}
+										index={index}
+										errors={errors}
+										remove={removeCert}
+									/>
+								))}
+								<Button
+									variant="contained"
+									onClick={() =>
+										appendCert({
+											name: '',
+											issuingOrganization: '',
+											issueDate: '',
+											expiryDate: '',
+											credentialId: '',
+											credentialUrl: '',
+										})
+									}
+									sx={{ mt: 2 }}
+								>
+									Add Certification
+								</Button>
+							</Paper>
+						</Box>
+					</motion.div>
+				);
+			case 5:
 				return (
 					<motion.div
 						initial={{ opacity: 0, x: 20 }}
@@ -531,7 +593,7 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 					setShowSuccess(false);
 					router.push('/my-cvs');
 				}}
-				message="CV created successfully! Click OK to view your CVs."
+				message="CV created successfully! Click Continue to view your CVs."
 				severity="success"
 				autoHideDuration={undefined}
 			/>

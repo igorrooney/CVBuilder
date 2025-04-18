@@ -1,10 +1,17 @@
 import { z } from 'zod';
 
+// British phone number regex
+const britishPhoneRegex = /^(\+44|0)7\d{9}$/;
+
 export const schema = z.object({
 	firstName: z.string().min(1, 'First name is required').max(100, 'First name is too long'),
 	lastName: z.string().min(1, 'Last name is required').max(100, 'Last name is too long'),
 	email: z.string().email('Invalid email address').max(100, 'Email is too long'),
-	phoneNumber: z.string().min(1, 'Phone number is required').max(20, 'Phone number is too long'),
+	phoneNumber: z
+		.string()
+		.min(1, 'Phone number is required')
+		.max(20, 'Phone number is too long')
+		.regex(britishPhoneRegex, 'Please enter a valid UK phone number'),
 	address: z.string().min(1, 'Address is required').max(200, 'Address is too long'),
 	summary: z
 		.string()
@@ -38,6 +45,18 @@ export const schema = z.object({
 			}),
 		)
 		.min(1, 'At least one education entry is required'),
+	certifications: z
+		.array(
+			z.object({
+				name: z.string().min(1, 'Certification name is required'),
+				issuingOrganization: z.string().min(1, 'Issuing organization is required'),
+				issueDate: z.string().min(1, 'Issue date is required'),
+				expiryDate: z.string().optional(),
+				credentialId: z.string().optional(),
+				credentialUrl: z.string().url('Invalid URL').optional(),
+			}),
+		)
+		.optional(),
 	skills: z.array(z.string()).min(1, 'At least one skill is required'),
 	hobbies: z.string().max(1000, 'Hobbies text is too long').optional(),
 });
