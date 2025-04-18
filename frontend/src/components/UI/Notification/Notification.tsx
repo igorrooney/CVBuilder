@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent, Button, Typography, Box, AlertColor } from '@mui/material';
+import { Dialog, Button, Typography, Box, AlertColor } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NotificationProps {
@@ -11,18 +11,13 @@ interface NotificationProps {
 	autoHideDuration?: number;
 }
 
-export default function Notification({
-	open,
-	onClose,
-	message,
-	severity = 'success',
-}: NotificationProps) {
+export default function Notification({ open, onClose, message }: NotificationProps) {
 	return (
 		<AnimatePresence>
 			{open && (
 				<Dialog
 					open={open}
-					onClose={(event, reason) => {
+					onClose={(_, reason) => {
 						if (reason !== 'backdropClick') {
 							onClose();
 						}
