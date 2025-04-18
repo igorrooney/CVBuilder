@@ -38,14 +38,12 @@ interface ErrorResponse {
 
 interface CVCreationFormProps {
 	onStepChange?: (step: number) => void;
-	onSubmit: (data: FormData) => Promise<void>;
-	isSubmitting: boolean;
 }
 
-const CVCreationForm = ({ onStepChange, onSubmit }: CVCreationFormProps) => {
+const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 	const [activeStep, setActiveStep] = useState(0);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const { isError, error, showSuccess, setShowSuccess, isPending } = useCreateCV();
+	const { createCV, isError, error, showSuccess, setShowSuccess, isPending } = useCreateCV();
 
 	const router = useRouter();
 
@@ -141,7 +139,7 @@ const CVCreationForm = ({ onStepChange, onSubmit }: CVCreationFormProps) => {
 	const onSubmitForm = async (data: FormData) => {
 		setErrorMessage(null);
 		try {
-			await onSubmit(data);
+			await createCV(data);
 		} catch (error) {
 			setErrorMessage(
 				error instanceof Error ? error.message : 'An error occurred while creating your CV',
@@ -533,9 +531,9 @@ const CVCreationForm = ({ onStepChange, onSubmit }: CVCreationFormProps) => {
 					setShowSuccess(false);
 					router.push('/my-cvs');
 				}}
-				message="CV created successfully!"
+				message="CV created successfully! Click OK to view your CVs."
 				severity="success"
-				autoHideDuration={999999}
+				autoHideDuration={undefined}
 			/>
 
 			<Notification

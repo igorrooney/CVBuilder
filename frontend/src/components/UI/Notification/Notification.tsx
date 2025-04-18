@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, AlertColor, Snackbar, Button, Typography } from '@mui/material';
+import { Dialog, DialogContent, Button, Typography, Box, AlertColor } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NotificationProps {
@@ -16,84 +16,78 @@ export default function Notification({
 	onClose,
 	message,
 	severity = 'success',
-	autoHideDuration = 6000,
 }: NotificationProps) {
 	return (
 		<AnimatePresence>
 			{open && (
-				<Snackbar
+				<Dialog
 					open={open}
-					autoHideDuration={autoHideDuration}
-					onClose={onClose}
-					anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-					sx={{
-						'& .MuiSnackbar-root': {
-							top: '24px',
+					onClose={(event, reason) => {
+						if (reason !== 'backdropClick') {
+							onClose();
+						}
+					}}
+					maxWidth="xs"
+					PaperProps={{
+						component: motion.div,
+						initial: { opacity: 0, y: 20 },
+						animate: { opacity: 1, y: 0 },
+						exit: { opacity: 0, y: 20 },
+						transition: { duration: 0.2 },
+						sx: {
+							borderRadius: 1,
+							overflow: 'hidden',
+							minWidth: '320px',
+							bgcolor: '#ffffff',
 						},
 					}}
-					role="alert"
-					aria-live={severity === 'error' ? 'assertive' : 'polite'}
 				>
-					<motion.div
-						initial={{ opacity: 0, y: -20 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -20 }}
-						transition={{ duration: 0.3 }}
-					>
-						<Alert
-							severity={severity}
-							variant="filled"
-							action={
-								<Button
-									color="inherit"
-									size="small"
-									onClick={onClose}
-									sx={{
-										'minWidth': '64px',
-										'textTransform': 'none',
-										'fontWeight': 500,
-										'&:hover': {
-											backgroundColor: 'rgba(255, 255, 255, 0.1)',
-										},
-									}}
-								>
-									{severity === 'error' ? 'Dismiss' : 'OK'}
-								</Button>
-							}
-							sx={{
-								'width': '100%',
-								'boxShadow':
-									'0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-								'& .MuiAlert-icon': {
-									fontSize: '1.5rem',
-									alignSelf: 'center',
-								},
-								'& .MuiAlert-message': {
-									fontSize: '1rem',
-									fontWeight: 500,
-									display: 'flex',
-									alignItems: 'center',
-									gap: 1,
-								},
-								'& .MuiAlert-action': {
-									alignItems: 'center',
-									paddingTop: 0,
-								},
-							}}
-						>
+					<Box sx={{ p: 3 }}>
+						<Box sx={{ textAlign: 'center', pb: 3 }}>
+							<Typography
+								variant="h6"
+								component="h2"
+								sx={{
+									fontSize: '1.25rem',
+									fontWeight: 600,
+									color: '#2E7D32',
+									mb: 1,
+								}}
+							>
+								Success!
+							</Typography>
 							<Typography
 								variant="body1"
-								component="span"
 								sx={{
-									fontWeight: 500,
-									lineHeight: 1.5,
+									color: 'grey.600',
+									fontSize: '0.975rem',
 								}}
 							>
 								{message}
 							</Typography>
-						</Alert>
-					</motion.div>
-				</Snackbar>
+						</Box>
+
+						<Button
+							fullWidth
+							variant="contained"
+							onClick={onClose}
+							sx={{
+								'py': 1.5,
+								'bgcolor': '#2E7D32',
+								'&:hover': {
+									bgcolor: '#1B5E20',
+								},
+								'textTransform': 'none',
+								'fontSize': '1rem',
+								'fontWeight': 500,
+								'boxShadow': 'none',
+								'borderRadius': 1,
+							}}
+						>
+							Continue
+						</Button>
+					</Box>
+				</Dialog>
 			)}
 		</AnimatePresence>
 	);

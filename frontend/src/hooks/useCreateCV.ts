@@ -156,7 +156,6 @@ export function useCreateCV() {
 				message: 'CV created successfully!',
 				severity: 'success',
 			});
-			router.push('/my-cvs');
 		},
 		onError: (error: Error) => {
 			setNotification({

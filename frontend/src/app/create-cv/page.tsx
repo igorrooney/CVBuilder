@@ -2,13 +2,11 @@
 
 import { Container, Box, CircularProgress } from '@mui/material';
 import CVCreationForm from './CVCreationForm';
-import { useCreateCV } from '@/hooks/useCreateCV';
 import { useLoggedInUser } from '@/hooks/useLoggedInUser';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function CreateCVPage() {
-	const { createCV, isPending } = useCreateCV();
 	const { user, isLoading, unauthorized } = useLoggedInUser();
 	const router = useRouter();
 
@@ -34,7 +32,7 @@ export default function CreateCVPage() {
 
 	return (
 		<Container maxWidth="md" sx={{ py: 4 }}>
-			<CVCreationForm onSubmit={createCV} isSubmitting={isPending} />
+			<CVCreationForm />
 		</Container>
 	);
 }
