@@ -1,67 +1,46 @@
 'use client';
 
 import { Box, Button, Paper, Typography } from '@mui/material';
-import { useFieldArray, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useFieldArray, useFormContext } from 'react-hook-form';
+import { FormData } from './schema/schema';
+import AddIcon from '@mui/icons-material/Add';
 import WorkExperienceItem from './WorkExperienceItem/WorkExperienceItem';
 
-const experienceSchema = z.object({
-	experiences: z.array(
-		z.object({
-			jobTitle: z.string().min(1, 'Job title is required'),
-			company: z.string().min(1, 'Company name is required'),
-			startDate: z.string().min(1, 'Start date is required'),
-			endDate: z.string().optional(),
-			isCurrent: z.boolean().optional(),
-			responsibilities: z.string().min(1, 'Responsibilities are required'),
-			achievements: z.string().optional(),
-		}),
-	),
-});
-
-type ExperienceData = z.infer<typeof experienceSchema>;
-
 interface ExperienceStepProps {
-	onNext: (data: ExperienceData) => void;
+	onNext: () => void;
 	onBack: () => void;
 }
 
 export function ExperienceStep({ onNext, onBack }: ExperienceStepProps) {
-	const {
-		control,
-		handleSubmit,
-		formState: { errors },
-	} = useForm<ExperienceData>({
-		resolver: zodResolver(experienceSchema),
-		defaultValues: {
-			experiences: [
-				{
-					jobTitle: '',
-					company: '',
-					startDate: '',
-					endDate: '',
-					isCurrent: false,
-					responsibilities: '',
-					achievements: '',
-				},
-			],
-		},
-	});
-
+	const { control, watch } = useFormContext<FormData>();
 	const { fields, append, remove } = useFieldArray({
 		control,
-		name: 'experiences',
+		name: 'experience',
 	});
+
+	const handleAddExperience = () => {
+		append({
+			jobTitle: '',
+			company: '',
+			startDate: '',
+			endDate: '',
+			isCurrent: false,
+			responsibilities: '',
+			achievements: '',
+		});
+	};
 
 	return (
 		<Box
 			component="form"
-			onSubmit={handleSubmit(onNext)}
+			onSubmit={(e) => {
+				e.preventDefault();
+				onNext();
+			}}
 			sx={{
 				display: 'flex',
 				flexDirection: 'column',
-				gap: 3,
+				gap: 2,
 			}}
 		>
 			<Box component="section" aria-labelledby="work-experience-heading">
@@ -74,31 +53,12 @@ export function ExperienceStep({ onNext, onBack }: ExperienceStepProps) {
 							key={field.id}
 							control={control}
 							index={index}
-							errors={errors}
-							remove={remove}
+							errors={{}}
+							remove={() => remove(index)}
+							watch={watch}
 						/>
 					))}
-					<Button
-						variant="contained"
-						onClick={() =>
-							append({
-								jobTitle: '',
-								company: '',
-								startDate: '',
-								endDate: '',
-								isCurrent: false,
-								responsibilities: '',
-								achievements: '',
-							})
-						}
-						sx={{
-							'mt': 2,
-							'background': 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-							'&:hover': {
-								background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
-							},
-						}}
-					>
+					<Button variant="outlined" startIcon={<AddIcon />} onClick={handleAddExperience}>
 						Add Experience
 					</Button>
 				</Paper>
@@ -107,6 +67,7 @@ export function ExperienceStep({ onNext, onBack }: ExperienceStepProps) {
 			<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
 				<Button
 					onClick={onBack}
+					variant="outlined"
 					sx={{
 						'color': 'primary.main',
 						'textTransform': 'uppercase',

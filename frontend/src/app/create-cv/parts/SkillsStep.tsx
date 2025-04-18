@@ -7,10 +7,10 @@ import { z } from 'zod';
 
 const skillsSchema = z.object({
 	skills: z.array(z.string()).min(1, 'At least one skill is required'),
-	hobbies: z.array(z.string()).optional(),
+	hobbies: z.string().optional(),
 });
 
-type SkillsData = z.infer<typeof skillsSchema>;
+export type SkillsData = z.infer<typeof skillsSchema>;
 
 interface SkillsStepProps {
 	onNext: (data: SkillsData) => void;
@@ -45,7 +45,7 @@ export function SkillsStep({ onNext, onBack }: SkillsStepProps) {
 		resolver: zodResolver(skillsSchema),
 		defaultValues: {
 			skills: [],
-			hobbies: [],
+			hobbies: '',
 		},
 	});
 
@@ -90,27 +90,16 @@ export function SkillsStep({ onNext, onBack }: SkillsStepProps) {
 			<Controller
 				name="hobbies"
 				control={control}
-				render={({ field: { onChange, value } }) => (
-					<Autocomplete
-						multiple
-						freeSolo
-						options={[]}
-						value={value}
-						onChange={(_, newValue) => onChange(newValue)}
-						renderTags={(value, getTagProps) =>
-							value.map((option, index) => (
-								<Chip variant="outlined" label={option} {...getTagProps({ index })} />
-							))
-						}
-						renderInput={(params) => (
-							<TextField
-								{...params}
-								label="Hobbies & Interests"
-								placeholder="Type your hobbies"
-								error={!!errors.hobbies}
-								helperText={errors.hobbies?.message}
-							/>
-						)}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label="Hobbies & Interests"
+						placeholder="Type your hobbies"
+						error={!!errors.hobbies}
+						helperText={errors.hobbies?.message}
+						fullWidth
+						multiline
+						rows={2}
 					/>
 				)}
 			/>

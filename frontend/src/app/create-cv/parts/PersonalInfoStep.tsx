@@ -13,7 +13,7 @@ const personalInfoSchema = z.object({
 	address: z.string().min(1, 'Address is required'),
 });
 
-type PersonalInfoData = z.infer<typeof personalInfoSchema>;
+export type PersonalInfoData = z.infer<typeof personalInfoSchema>;
 
 interface PersonalInfoStepProps {
 	onNext: (data: PersonalInfoData) => void;

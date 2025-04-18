@@ -1,9 +1,10 @@
 'use client';
 
 import { Box, TextField, Button } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { FormData } from './schema/schema';
 
 const summarySchema = z.object({
 	summary: z.string().min(50, 'Summary should be at least 50 characters long'),
@@ -12,11 +13,12 @@ const summarySchema = z.object({
 type SummaryData = z.infer<typeof summarySchema>;
 
 interface SummaryStepProps {
-	onNext: (data: SummaryData) => void;
+	onNext: (data: FormData) => void;
 	onBack: () => void;
 }
 
 export function SummaryStep({ onNext, onBack }: SummaryStepProps) {
+	const { getValues } = useFormContext<FormData>();
 	const {
 		register,
 		handleSubmit,
@@ -25,10 +27,15 @@ export function SummaryStep({ onNext, onBack }: SummaryStepProps) {
 		resolver: zodResolver(summarySchema),
 	});
 
+	const onSubmit = (data: SummaryData) => {
+		const formData = getValues();
+		onNext({ ...formData, ...data });
+	};
+
 	return (
 		<Box
 			component="form"
-			onSubmit={handleSubmit(onNext)}
+			onSubmit={handleSubmit(onSubmit)}
 			sx={{
 				display: 'flex',
 				flexDirection: 'column',

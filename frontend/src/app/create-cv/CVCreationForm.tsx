@@ -6,13 +6,11 @@ import {
 	Box,
 	Button,
 	Container,
-	TextField,
 	Typography,
 	Alert,
 	Paper,
 	Fade,
 	CircularProgress,
-	useTheme,
 	Stepper,
 	Step,
 	StepLabel,
@@ -21,7 +19,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import EducationItem from './parts/EducationItem';
 import FormInput from './parts/FormInput';
 import { FormData, schema } from './parts/schema/schema';
@@ -40,12 +38,11 @@ interface CVCreationFormProps {
 	isSubmitting: boolean;
 }
 
-const CVCreationForm = ({ onStepChange, onSubmit, isSubmitting }: CVCreationFormProps) => {
+const CVCreationForm = ({ onStepChange, onSubmit }: CVCreationFormProps) => {
 	const [activeStep, setActiveStep] = useState(0);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const { createCV, isError, error, isSuccess, showSuccess, setShowSuccess, isPending } =
-		useCreateCV();
-	const theme = useTheme();
+	const { isError, error, showSuccess, setShowSuccess, isPending } = useCreateCV();
+
 	const router = useRouter();
 
 	// Add effect to track showSuccess changes
@@ -84,7 +81,7 @@ const CVCreationForm = ({ onStepChange, onSubmit, isSubmitting }: CVCreationForm
 				},
 			],
 			education: [{ institution: '', degree: '', graduationYear: '' }],
-			skills: '',
+			skills: [],
 			hobbies: '',
 		},
 		mode: 'onTouched',

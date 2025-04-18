@@ -19,7 +19,7 @@ const educationSchema = z.object({
 	),
 });
 
-type EducationData = z.infer<typeof educationSchema>;
+export type EducationData = z.infer<typeof educationSchema>;
 
 interface EducationStepProps {
 	onNext: (data: EducationData) => void;

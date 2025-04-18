@@ -1,8 +1,7 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { Client, Databases, Account, Models, ID } from 'appwrite';
-import { appwriteConfig } from '@/lib/appwrite/config';
+import { Models } from 'appwrite';
 import { FormData } from '@/app/create-cv/parts/schema/schema';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -38,6 +37,11 @@ export interface CreateCVResult {
 	educationDocs: Models.Document[];
 }
 
+interface CVCreationResponse {
+	success: boolean;
+	message: string;
+}
+
 export function useCreateCV() {
 	const [showSuccess, setShowSuccess] = useState(false);
 	const [notification, setNotification] = useState({
@@ -49,68 +53,29 @@ export function useCreateCV() {
 
 	const {
 		mutate: createCV,
+		isPending,
 		isError,
 		error,
 		isSuccess,
-		isPending,
-	} = useMutation({
-		mutationFn: async (data: CVCreationFormData) => {
-			const client = new Client()
-				.setEndpoint(appwriteConfig.endpointUrl)
-				.setProject(appwriteConfig.projectId);
-
-			const account = new Account(client);
-			const databases = new Databases(client);
-
-			const user = await account.get();
-			if (!user) throw new Error('User not authenticated');
-
-			const cv = await databases.createDocument(
-				appwriteConfig.databaseId,
-				appwriteConfig.cvsCollectionId,
-				ID.unique(),
-				{
-					userId: user.$id,
-					firstName: data.firstName,
-					lastName: data.lastName,
-					email: data.email,
-					phoneNumber: data.phoneNumber,
-					address: data.address,
-					summary: data.summary,
-					skills: data.skills,
-					hobbies: data.hobbies,
+	} = useMutation<CVCreationResponse, Error, FormData>({
+		mutationFn: async (data) => {
+			const response = await fetch('/api/cv', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			);
+				body: JSON.stringify({
+					...data,
+					skills: Array.isArray(data.skills) ? data.skills : [data.skills],
+					hobbies: data.hobbies || [],
+				}),
+			});
 
-			const experienceDocs = await Promise.all(
-				data.experience.map((exp) =>
-					databases.createDocument(
-						appwriteConfig.databaseId,
-						appwriteConfig.workExperiencesCollectionId,
-						ID.unique(),
-						{
-							cvId: cv.$id,
-							...exp,
-						},
-					),
-				),
-			);
+			if (!response.ok) {
+				throw new Error('Failed to create CV');
+			}
 
-			const educationDocs = await Promise.all(
-				data.education.map((edu) =>
-					databases.createDocument(
-						appwriteConfig.databaseId,
-						appwriteConfig.educationsCollectionId,
-						ID.unique(),
-						{
-							cvId: cv.$id,
-							...edu,
-						},
-					),
-				),
-			);
-
-			return { cv, experienceDocs, educationDocs };
+			return response.json();
 		},
 		onSuccess: () => {
 			setShowSuccess(true);
@@ -135,13 +100,15 @@ export function useCreateCV() {
 	};
 
 	return {
-		createCV,
+		createCV: async (data: FormData) => {
+			await createCV(data);
+		},
+		isPending,
 		isError,
 		error,
 		isSuccess,
 		showSuccess,
 		setShowSuccess,
-		isPending,
 		notification,
 		handleCloseNotification,
 	};
