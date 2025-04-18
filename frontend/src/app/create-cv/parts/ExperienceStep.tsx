@@ -12,7 +12,11 @@ interface ExperienceStepProps {
 }
 
 export function ExperienceStep({ onNext, onBack }: ExperienceStepProps) {
-	const { control, watch } = useFormContext<FormData>();
+	const {
+		control,
+		watch,
+		formState: { errors },
+	} = useFormContext<FormData>();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'experience',
@@ -43,6 +47,7 @@ export function ExperienceStep({ onNext, onBack }: ExperienceStepProps) {
 				gap: 2,
 			}}
 		>
+			123
 			<Box component="section" aria-labelledby="work-experience-heading">
 				<Typography variant="h6" id="work-experience-heading" gutterBottom>
 					Work Experience
@@ -53,7 +58,7 @@ export function ExperienceStep({ onNext, onBack }: ExperienceStepProps) {
 							key={field.id}
 							control={control}
 							index={index}
-							errors={{}}
+							errors={errors}
 							remove={() => remove(index)}
 							watch={watch}
 						/>
@@ -63,7 +68,6 @@ export function ExperienceStep({ onNext, onBack }: ExperienceStepProps) {
 					</Button>
 				</Paper>
 			</Box>
-
 			<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
 				<Button
 					onClick={onBack}

@@ -5,6 +5,8 @@ import { Models } from 'appwrite';
 import { FormData } from '@/app/create-cv/parts/schema/schema';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { databases, account } from '@/lib/appwrite';
+import { ID } from 'appwrite';
 
 export interface CVCreationFormData {
 	firstName: string;
@@ -59,23 +61,93 @@ export function useCreateCV() {
 		isSuccess,
 	} = useMutation<CVCreationResponse, Error, FormData>({
 		mutationFn: async (data) => {
-			const response = await fetch('/api/cv', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					...data,
-					skills: Array.isArray(data.skills) ? data.skills : [data.skills],
-					hobbies: data.hobbies || [],
-				}),
-			});
+			try {
+				// Get current user with proper error handling
+				let currentUser;
+				try {
+					currentUser = await account.get();
+				} catch (error: any) {
+					if (error.code === 401) {
+						router.push('/login?callbackUrl=/create-cv');
+						throw new Error('Please log in to create a CV');
+					}
+					throw error;
+				}
 
-			if (!response.ok) {
-				throw new Error('Failed to create CV');
+				// Convert skills array to string
+				const skillsString = Array.isArray(data.skills)
+					? data.skills.filter((skill) => skill && typeof skill === 'string').join(', ')
+					: '';
+
+				// Create the main CV document
+				const cv = await databases.createDocument(
+					process.env.NEXT_PUBLIC_APPWRITE_DATABASE!,
+					process.env.NEXT_PUBLIC_APPWRITE_CVS_COLLECTION!,
+					ID.unique(),
+					{
+						userId: currentUser.$id,
+						firstName: data.firstName,
+						lastName: data.lastName,
+						email: data.email,
+						phoneNumber: data.phoneNumber,
+						address: data.address,
+						summary: data.summary,
+						skills: skillsString,
+						hobbies: data.hobbies || '',
+					},
+				);
+
+				// Create experience documents - removed userId field as it's not in the schema
+				const experiencePromises = data.experience.map((exp) =>
+					databases.createDocument(
+						process.env.NEXT_PUBLIC_APPWRITE_DATABASE!,
+						process.env.NEXT_PUBLIC_APPWRITE_WORK_EXPERIENCES_COLLECTION!,
+						ID.unique(),
+						{
+							cvId: cv.$id,
+							jobTitle: exp.jobTitle,
+							company: exp.company,
+							startDate: exp.startDate,
+							endDate: exp.endDate,
+							responsibilities: exp.responsibilities || '',
+							achievements: exp.achievements || '',
+							isCurrent: exp.isCurrent,
+						},
+					),
+				);
+
+				// Create education documents - removed userId field as it's not in the schema
+				const educationPromises = data.education.map((edu) =>
+					databases.createDocument(
+						process.env.NEXT_PUBLIC_APPWRITE_DATABASE!,
+						process.env.NEXT_PUBLIC_APPWRITE_EDUCATIONS_COLLECTION!,
+						ID.unique(),
+						{
+							cvId: cv.$id,
+							institution: edu.institution,
+							degree: edu.degree,
+							graduationYear: edu.graduationYear,
+						},
+					),
+				);
+
+				await Promise.all([...experiencePromises, ...educationPromises]);
+
+				return {
+					success: true,
+					message: 'CV created successfully',
+				};
+			} catch (error: any) {
+				console.error('Error creating CV:', error);
+				// Provide more specific error messages
+				if (error.code === 401) {
+					throw new Error('Please log in to create a CV');
+				} else if (error.message) {
+					throw new Error(error.message);
+				} else {
+					throw new Error('Failed to create CV. Please try again.');
+				}
 			}
-
-			return response.json();
 		},
 		onSuccess: () => {
 			setShowSuccess(true);

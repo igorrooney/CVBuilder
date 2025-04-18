@@ -1,0 +1,375 @@
+{
+  "collections": [
+    {
+      "id": "67d050fe0032f846f20c",
+      "name": "CVs",
+      "attributes": [
+        {
+          "key": "userId",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:05:29.750+00:00",
+          "$updatedAt": "2025-03-11T15:05:29.973+00:00",
+          "size": 255,
+          "default": null
+        },
+        {
+          "key": "firstName",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:08:52.713+00:00",
+          "$updatedAt": "2025-03-11T15:11:53.116+00:00",
+          "size": 255,
+          "default": null
+        },
+        {
+          "key": "lastName",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:39:10.410+00:00",
+          "$updatedAt": "2025-03-11T15:39:10.601+00:00",
+          "size": 255,
+          "default": null
+        },
+        {
+          "key": "email",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:39:22.148+00:00",
+          "$updatedAt": "2025-03-11T15:39:22.371+00:00",
+          "size": 255,
+          "default": null
+        },
+        {
+          "key": "phoneNumber",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:39:43.441+00:00",
+          "$updatedAt": "2025-03-11T15:39:43.662+00:00",
+          "size": 30,
+          "default": null
+        },
+        {
+          "key": "summary",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:40:16.133+00:00",
+          "$updatedAt": "2025-03-11T15:40:16.307+00:00",
+          "size": 500,
+          "default": null
+        },
+        {
+          "key": "skills",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:40:37.140+00:00",
+          "$updatedAt": "2025-03-11T15:40:37.368+00:00",
+          "size": 1000,
+          "default": null
+        },
+        {
+          "key": "hobbies",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-11T15:40:48.927+00:00",
+          "$updatedAt": "2025-03-11T15:40:49.188+00:00",
+          "size": 1000,
+          "default": null
+        },
+        {
+          "key": "address",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-29T19:59:01.051+00:00",
+          "$updatedAt": "2025-03-29T19:59:01.221+00:00",
+          "size": 500,
+          "default": null
+        },
+        {
+          "key": "experience",
+          "type": "relationship",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-29T20:00:24.233+00:00",
+          "$updatedAt": "2025-03-29T20:00:24.654+00:00",
+          "relatedCollection": "67d05cb7001b2aa79652",
+          "relationType": "oneToMany",
+          "twoWay": false,
+          "twoWayKey": "67e85158003e21eba6e8",
+          "onDelete": "cascade",
+          "side": "parent"
+        },
+        {
+          "key": "education",
+          "type": "relationship",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-29T20:01:11.093+00:00",
+          "$updatedAt": "2025-03-29T20:01:11.487+00:00",
+          "relatedCollection": "67d05ab2003095bcb3d7",
+          "relationType": "oneToMany",
+          "twoWay": false,
+          "twoWayKey": "67e8518700300a2cb101",
+          "onDelete": "cascade",
+          "side": "parent"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "id": "67d05ab2003095bcb3d7",
+      "name": "Educations",
+      "attributes": [
+        {
+          "key": "cvId",
+          "type": "relationship",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-11T15:50:44.337+00:00",
+          "$updatedAt": "2025-03-11T15:50:45.129+00:00",
+          "relatedCollection": "67d050fe0032f846f20c",
+          "relationType": "manyToOne",
+          "twoWay": false,
+          "twoWayKey": "67d05bd500165f7c9cdc",
+          "onDelete": "cascade",
+          "side": "parent"
+        },
+        {
+          "key": "degree",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:51:42.873+00:00",
+          "$updatedAt": "2025-03-11T15:51:43.076+00:00",
+          "size": 500,
+          "default": null
+        },
+        {
+          "key": "institution",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:51:59.928+00:00",
+          "$updatedAt": "2025-03-11T15:52:00.183+00:00",
+          "size": 500,
+          "default": null
+        },
+        {
+          "key": "graduationYear",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-29T20:08:34.637+00:00",
+          "$updatedAt": "2025-03-29T20:08:34.908+00:00",
+          "size": 4,
+          "default": null
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "id": "67d05cb7001b2aa79652",
+      "name": "WorkExperiences",
+      "attributes": [
+        {
+          "key": "cvId",
+          "type": "relationship",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-11T15:56:01.108+00:00",
+          "$updatedAt": "2025-03-11T15:56:02.070+00:00",
+          "relatedCollection": "67d050fe0032f846f20c",
+          "relationType": "manyToOne",
+          "twoWay": false,
+          "twoWayKey": "67d05d12000acc8a6724",
+          "onDelete": "cascade",
+          "side": "parent"
+        },
+        {
+          "key": "jobTitle",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:56:31.931+00:00",
+          "$updatedAt": "2025-03-11T15:56:32.166+00:00",
+          "size": 255,
+          "default": null
+        },
+        {
+          "key": "company",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:56:44.846+00:00",
+          "$updatedAt": "2025-03-11T15:56:45.080+00:00",
+          "size": 255,
+          "default": null
+        },
+        {
+          "key": "startDate",
+          "type": "datetime",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T15:57:16.836+00:00",
+          "$updatedAt": "2025-03-11T15:57:17.078+00:00",
+          "format": "",
+          "default": null
+        },
+        {
+          "key": "endDate",
+          "type": "datetime",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-11T15:57:33.632+00:00",
+          "$updatedAt": "2025-03-11T15:57:33.902+00:00",
+          "format": "",
+          "default": null
+        },
+        {
+          "key": "responsibilities",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-11T15:57:55.156+00:00",
+          "$updatedAt": "2025-03-11T15:57:55.478+00:00",
+          "size": 1000,
+          "default": null
+        },
+        {
+          "key": "achievements",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-11T15:58:12.989+00:00",
+          "$updatedAt": "2025-03-11T15:58:13.144+00:00",
+          "size": 1000,
+          "default": null
+        },
+        {
+          "key": "isCurrent",
+          "type": "boolean",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-22T22:27:36.567+00:00",
+          "$updatedAt": "2025-03-22T22:27:36.747+00:00",
+          "default": null
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "id": "67d05de500037ea37dfd",
+      "name": "Certifications",
+      "attributes": [
+        {
+          "key": "cvId",
+          "type": "relationship",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2025-03-11T15:59:57.029+00:00",
+          "$updatedAt": "2025-03-11T15:59:57.357+00:00",
+          "relatedCollection": "67d050fe0032f846f20c",
+          "relationType": "manyToOne",
+          "twoWay": false,
+          "twoWayKey": "67d05dfe0003d305d595",
+          "onDelete": "cascade",
+          "side": "parent"
+        },
+        {
+          "key": "certificationName",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T16:00:34.568+00:00",
+          "$updatedAt": "2025-03-11T16:00:51.198+00:00",
+          "size": 255,
+          "default": null
+        },
+        {
+          "key": "issuedBy",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T16:01:14.995+00:00",
+          "$updatedAt": "2025-03-14T23:13:52.097+00:00",
+          "size": 255,
+          "default": null
+        },
+        {
+          "key": "issueDate",
+          "type": "datetime",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-03-11T16:01:28.054+00:00",
+          "$updatedAt": "2025-03-14T23:14:02.575+00:00",
+          "format": "",
+          "default": null
+        }
+      ],
+      "indexes": []
+    }
+  ]
+}

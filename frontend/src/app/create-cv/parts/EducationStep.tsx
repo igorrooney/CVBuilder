@@ -8,15 +8,21 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
 const educationSchema = z.object({
-	education: z.array(
-		z.object({
-			institution: z.string().min(1, 'Institution name is required'),
-			degree: z.string().min(1, 'Degree is required'),
-			graduationYear: z.string().min(1, 'Graduation year is required'),
-			fieldOfStudy: z.string().optional(),
-			grade: z.string().optional(),
-		}),
-	),
+	education: z
+		.array(
+			z.object({
+				institution: z
+					.string()
+					.min(1, 'Institution name is required')
+					.max(100, 'Institution name is too long'),
+				degree: z.string().min(1, 'Degree is required').max(100, 'Degree is too long'),
+				graduationYear: z
+					.string()
+					.min(1, 'Graduation year is required')
+					.max(4, 'Invalid graduation year'),
+			}),
+		)
+		.min(1, 'At least one education entry is required'),
 });
 
 export type EducationData = z.infer<typeof educationSchema>;
@@ -40,8 +46,6 @@ export function EducationStep({ onNext, onBack }: EducationStepProps) {
 					institution: '',
 					degree: '',
 					graduationYear: '',
-					fieldOfStudy: '',
-					grade: '',
 				},
 			],
 		},
@@ -98,30 +102,13 @@ export function EducationStep({ onNext, onBack }: EducationStepProps) {
 						sx={{ mb: 2 }}
 					/>
 					<TextField
-						label="Field of Study"
-						{...register(`education.${index}.fieldOfStudy`)}
-						error={!!errors.education?.[index]?.fieldOfStudy}
-						helperText={errors.education?.[index]?.fieldOfStudy?.message}
+						label="Graduation Year"
+						type="number"
+						{...register(`education.${index}.graduationYear`)}
+						error={!!errors.education?.[index]?.graduationYear}
+						helperText={errors.education?.[index]?.graduationYear?.message}
 						fullWidth
-						sx={{ mb: 2 }}
 					/>
-					<Box sx={{ display: 'flex', gap: 2 }}>
-						<TextField
-							label="Graduation Year"
-							type="number"
-							{...register(`education.${index}.graduationYear`)}
-							error={!!errors.education?.[index]?.graduationYear}
-							helperText={errors.education?.[index]?.graduationYear?.message}
-							fullWidth
-						/>
-						<TextField
-							label="Grade"
-							{...register(`education.${index}.grade`)}
-							error={!!errors.education?.[index]?.grade}
-							helperText={errors.education?.[index]?.grade?.message}
-							fullWidth
-						/>
-					</Box>
 				</Box>
 			))}
 
@@ -132,8 +119,6 @@ export function EducationStep({ onNext, onBack }: EducationStepProps) {
 						institution: '',
 						degree: '',
 						graduationYear: '',
-						fieldOfStudy: '',
-						grade: '',
 					})
 				}
 				sx={{ alignSelf: 'flex-start' }}

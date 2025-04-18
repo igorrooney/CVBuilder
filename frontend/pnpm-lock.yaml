@@ -49,9 +49,6 @@ dependencies:
   clsx:
     specifier: ^2.1.1
     version: 2.1.1
-  dotenv:
-    specifier: ^16.4.1
-    version: 16.5.0
   framer-motion:
     specifier: ^11.18.2
     version: 11.18.2(react-dom@18.3.1)(react@18.3.1)
@@ -67,9 +64,6 @@ dependencies:
   next-themes:
     specifier: ^0.4.6
     version: 0.4.6(react-dom@18.3.1)(react@18.3.1)
-  node-appwrite:
-    specifier: ^13.0.0
-    version: 13.0.0
   react:
     specifier: ^18.2.0
     version: 18.3.1
@@ -159,6 +153,9 @@ devDependencies:
   babel-plugin-twin:
     specifier: ^1.1.0
     version: 1.1.0
+  dotenv:
+    specifier: ^16.5.0
+    version: 16.5.0
   eslint:
     specifier: ^8.56.0
     version: 8.57.1
@@ -195,6 +192,9 @@ devDependencies:
   jest-environment-jsdom:
     specifier: ^29.7.0
     version: 29.7.0
+  node-appwrite:
+    specifier: ^13.0.0
+    version: 13.0.0
   postcss:
     specifier: ^8.4.35
     version: 8.5.3
@@ -6977,6 +6977,7 @@ packages:
   /dotenv@16.5.0:
     resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
     engines: {node: '>=12'}
+    dev: true
 
   /dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -10044,11 +10045,11 @@ packages:
     resolution: {integrity: sha512-O1g1RWcRYcvnVvR0Dykjoe/4UcL6ELVvZosb4B8/hhNvleuWfN2fOFxzeCaU8amGW6UtVtZqvNaUT3IF1mPBdA==}
     dependencies:
       node-fetch-native-with-agent: 1.7.2
-    dev: false
+    dev: true
 
   /node-fetch-native-with-agent@1.7.2:
     resolution: {integrity: sha512-5MaOOCuJEvcckoz7/tjdx1M6OusOY6Xc5f459IaruGStWnKzlI1qpNgaAwmn4LmFYcsSlj+jBMk84wmmRxfk5g==}
-    dev: false
+    dev: true
 
   /node-fetch@2.6.7:
     resolution: {integrity: sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==}

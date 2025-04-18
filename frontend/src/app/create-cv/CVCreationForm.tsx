@@ -15,6 +15,9 @@ import {
 	Step,
 	StepLabel,
 	LinearProgress,
+	Autocomplete,
+	TextField,
+	Chip,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import Head from 'next/head';
@@ -27,6 +30,7 @@ import { stepFieldGroups, steps } from './parts/steps/steps';
 import WorkExperienceItem from './parts/WorkExperienceItem/WorkExperienceItem';
 import Notification from '@/components/UI/Notification/Notification';
 import { useRouter } from 'next/navigation';
+import { Controller } from 'react-hook-form';
 
 interface ErrorResponse {
 	message: string;
@@ -246,7 +250,7 @@ const CVCreationForm = ({ onStepChange, onSubmit }: CVCreationFormProps) => {
 										control={control}
 										index={index}
 										errors={errors}
-										remove={removeExp}
+										remove={(i) => removeExp(i)}
 										watch={watch}
 									/>
 								))}
@@ -317,12 +321,34 @@ const CVCreationForm = ({ onStepChange, onSubmit }: CVCreationFormProps) => {
 								Skills & Hobbies
 							</Typography>
 							<Paper elevation={0} sx={{ p: 3, bgcolor: 'background.paper' }}>
-								<FormInput
+								<Controller
 									name="skills"
 									control={control}
-									label="Skills (comma separated)"
-									error={!!errors.skills}
-									helperText={errors.skills?.message || 'Enter skills separated by commas'}
+									render={({ field: { onChange, value } }) => (
+										<Autocomplete
+											multiple
+											freeSolo
+											options={[]}
+											value={value || []}
+											onChange={(_, newValue) => onChange(newValue)}
+											renderTags={(value, getTagProps) =>
+												value.map((option, index) => (
+													<Chip variant="outlined" label={option} {...getTagProps({ index })} />
+												))
+											}
+											renderInput={(params) => (
+												<TextField
+													{...params}
+													label="Skills"
+													placeholder="Type a skill and press Enter"
+													error={!!errors.skills}
+													helperText={errors.skills?.message || 'Enter skills one at a time'}
+													fullWidth
+													sx={{ mb: 2 }}
+												/>
+											)}
+										/>
+									)}
 								/>
 								<FormInput
 									name="hobbies"
