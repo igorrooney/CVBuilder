@@ -1,5 +1,5 @@
 import { FieldPath } from 'react-hook-form';
-import { FormData } from '../schema/schema';
+import { CVFormData } from '@/types/cv';
 
 export const steps = [
 	'Personal Details',
@@ -10,9 +10,8 @@ export const steps = [
 	'Skills & Hobbies',
 ];
 
-type StepFields = FieldPath<FormData>[];
-export const stepFieldGroups: StepFields[] = [
-	['firstName', 'lastName', 'email', 'phoneNumber', 'address'],
+export const stepFieldGroups: FieldPath<CVFormData>[][] = [
+	['title', 'firstName', 'lastName', 'email', 'phoneNumber', 'address'],
 	['summary'],
 	['experience'],
 	['education'],

@@ -18,7 +18,8 @@
 		"prepare": "husky install",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"postinstall": "pnpm dlx husky install"
+		"postinstall": "pnpm dlx husky install",
+		"download-schema": "node scripts/download-schema.js"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.11.3",
@@ -34,6 +35,7 @@
 		"axios": "^1.6.7",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"date-fns": "^4.1.0",
 		"framer-motion": "^11.18.2",
 		"jose": "^5.2.2",
 		"lucide-react": "^0.330.0",

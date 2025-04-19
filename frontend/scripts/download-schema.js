@@ -1,20 +1,17 @@
-image.pngrequire('dotenv').config({ path: '.env.appwrite.temp' });
 const { Client, Databases } = require('node-appwrite');
-const fs = require('fs');
-const path = require('path');
+require('dotenv').config({ path: '.env.local' });
 
 const client = new Client()
-	.setEndpoint(process.env.APPWRITE_ENDPOINT)
-	.setProject(process.env.APPWRITE_PROJECT_ID)
-	.setKey(process.env.APPWRITE_API_KEY);
+	.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+	.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT)
+	.setKey(process.env.NEXT_APPWRITE_KEY);
 
 const databases = new Databases(client);
-const databaseId = '67d050e70035a896f16c'; // Database ID from .env.local
 
 async function downloadSchema() {
 	try {
 		// Get all collections from the database
-		const collections = await databases.listCollections(databaseId);
+		const collections = await databases.listCollections(process.env.NEXT_PUBLIC_APPWRITE_DATABASE);
 
 		const schema = {
 			collections: collections.collections.map((collection) => ({
@@ -26,6 +23,8 @@ async function downloadSchema() {
 		};
 
 		// Write schema to file
+		const fs = require('fs');
+		const path = require('path');
 		const schemaPath = path.join(__dirname, '..', 'src', 'schema', 'appwrite-schema.json');
 		fs.mkdirSync(path.dirname(schemaPath), { recursive: true });
 		fs.writeFileSync(schemaPath, JSON.stringify(schema, null, 2));

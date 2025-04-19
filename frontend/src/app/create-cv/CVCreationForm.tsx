@@ -66,6 +66,7 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 	} = useForm<FormData>({
 		resolver: zodResolver(schema),
 		defaultValues: {
+			title: '',
 			firstName: '',
 			lastName: '',
 			email: '',
@@ -183,6 +184,17 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 								Personal Details
 							</Typography>
 							<Paper elevation={0} sx={{ p: 3, bgcolor: 'background.paper' }}>
+								<FormInput
+									name="title"
+									control={control}
+									label="CV Title"
+									error={!!errors.title}
+									helperText={
+										errors.title?.message ||
+										"Give your CV a descriptive title (e.g., 'Software Engineer 2024', 'Marketing Specialist')"
+									}
+									autoFocus
+								/>
 								<FormInput
 									name="firstName"
 									control={control}
@@ -591,7 +603,7 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 				open={showSuccess}
 				onClose={() => {
 					setShowSuccess(false);
-					router.push('/my-cvs');
+					router.push('/cvs');
 				}}
 				message="CV created successfully! Click Continue to view your CVs."
 				severity="success"
