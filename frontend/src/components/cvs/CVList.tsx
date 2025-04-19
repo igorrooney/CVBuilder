@@ -119,53 +119,6 @@ export function CVList({
 			</>
 		);
 
-		const actionButtons = isMobile ? (
-			<Box className="flex shrink-0 items-center">
-				<IconButton size="small" onClick={(e) => handleMenuOpen(e, cv.id)} color="primary">
-					<MoreVertIcon fontSize="small" />
-				</IconButton>
-			</Box>
-		) : (
-			<Box className="flex shrink-0 items-center space-x-2">
-				<Button
-					startIcon={<VisibilityIcon />}
-					onClick={() => onPreview(cv.id)}
-					size="small"
-					variant="text"
-					color="primary"
-				>
-					Preview
-				</Button>
-				<Button
-					startIcon={<EditIcon />}
-					onClick={() => onEdit(cv.id)}
-					size="small"
-					variant="text"
-					color="primary"
-				>
-					Edit
-				</Button>
-				<Button
-					startIcon={<DownloadIcon />}
-					onClick={() => onDownload(cv.id)}
-					size="small"
-					variant="text"
-					color="primary"
-				>
-					Download
-				</Button>
-				<Button
-					startIcon={<DeleteIcon />}
-					onClick={() => onDelete(cv.id)}
-					size="small"
-					variant="text"
-					color="error"
-				>
-					Delete
-				</Button>
-			</Box>
-		);
-
 		if (viewMode === 'grid') {
 			return (
 				<Grid item xs={12} sm={6} md={4} key={cv.id}>
@@ -175,9 +128,72 @@ export function CVList({
 						exit={{ opacity: 0, height: 0 }}
 						transition={{ duration: 0.2, delay: index * 0.05 }}
 					>
-						<Card className="h-full overflow-hidden">
-							<CardContent className="pb-2">{cardContent}</CardContent>
-							<CardActions className="justify-end px-2 pb-2">{actionButtons}</CardActions>
+						<Card>
+							<CardContent>{cardContent}</CardContent>
+							<Divider />
+							{isMobile ? (
+								<Box className="flex justify-end p-2">
+									<IconButton
+										size="small"
+										onClick={(e) => handleMenuOpen(e, cv.id)}
+										color="primary"
+									>
+										<MoreVertIcon fontSize="small" />
+									</IconButton>
+								</Box>
+							) : (
+								<Box
+									className="flex space-x-1 p-2"
+									sx={{
+										justifyContent: 'space-evenly',
+									}}
+								>
+									<IconButton
+										size="small"
+										sx={{
+											width: '20px',
+											height: '20px',
+										}}
+										onClick={() => onPreview(cv.id)}
+										color="primary"
+									>
+										<VisibilityIcon fontSize="small" />
+									</IconButton>
+									<IconButton
+										size="small"
+										sx={{
+											width: '20px',
+											height: '20px',
+										}}
+										onClick={() => onEdit(cv.id)}
+										color="primary"
+									>
+										<EditIcon fontSize="small" />
+									</IconButton>
+									<IconButton
+										size="small"
+										sx={{
+											width: '20px',
+											height: '20px',
+										}}
+										onClick={() => onDownload(cv.id)}
+										color="primary"
+									>
+										<DownloadIcon fontSize="small" />
+									</IconButton>
+									<IconButton
+										size="small"
+										sx={{
+											width: '20px',
+											height: '20px',
+										}}
+										onClick={() => onDelete(cv.id)}
+										color="error"
+									>
+										<DeleteIcon fontSize="small" />
+									</IconButton>
+								</Box>
+							)}
 						</Card>
 					</motion.div>
 				</Grid>
@@ -195,7 +211,44 @@ export function CVList({
 			>
 				<ListItem className="flex items-center justify-between py-2">
 					<Box className="min-w-0 flex-grow overflow-hidden">{cardContent}</Box>
-					{actionButtons}
+					<Box className="flex shrink-0 items-center space-x-2">
+						<Button
+							startIcon={<VisibilityIcon />}
+							onClick={() => onPreview(cv.id)}
+							size="small"
+							variant="text"
+							color="primary"
+						>
+							Preview
+						</Button>
+						<Button
+							startIcon={<EditIcon />}
+							onClick={() => onEdit(cv.id)}
+							size="small"
+							variant="text"
+							color="primary"
+						>
+							Edit
+						</Button>
+						<Button
+							startIcon={<DownloadIcon />}
+							onClick={() => onDownload(cv.id)}
+							size="small"
+							variant="text"
+							color="primary"
+						>
+							Download
+						</Button>
+						<Button
+							startIcon={<DeleteIcon />}
+							onClick={() => onDelete(cv.id)}
+							size="small"
+							variant="text"
+							color="error"
+						>
+							Delete
+						</Button>
+					</Box>
 				</ListItem>
 				{index < filteredAndSortedCVs.length - 1 && <Divider />}
 			</motion.div>
