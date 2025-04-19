@@ -3,7 +3,6 @@ export interface CV {
 	title: string;
 	createdAt: Date;
 	updatedAt: Date;
-	status: 'draft' | 'published';
 	thumbnail?: string | null;
 	metadata?: {
 		language?: string;
@@ -13,10 +12,10 @@ export interface CV {
 }
 
 export interface CVActions {
-	onPreview: (id: string) => Promise<void>;
-	onEdit: (id: string) => Promise<void>;
-	onDelete: (id: string) => Promise<void>;
-	onDownload: (id: string) => Promise<void>;
+	onPreview: (id: string) => void;
+	onEdit: (id: string) => void;
+	onDelete: (id: string) => void;
+	onDownload: (id: string) => void;
 }
 
 export interface CVCardProps extends CVActions {
@@ -25,6 +24,8 @@ export interface CVCardProps extends CVActions {
 
 export interface CVListProps extends CVActions {
 	cvs: CV[];
+	viewMode: 'grid' | 'list';
+	onViewModeChange: (mode: 'grid' | 'list') => void;
 }
 
 export interface CVFormData {

@@ -3,7 +3,6 @@
 import {
 	List,
 	ListItem,
-	ListItemText,
 	Button,
 	Divider,
 	Typography,
@@ -14,6 +13,16 @@ import {
 	MenuItem,
 	FormControl,
 	InputLabel,
+	Grid,
+	Card,
+	CardContent,
+	CardActions,
+	IconButton,
+	Box,
+	useMediaQuery,
+	useTheme,
+	Menu,
+	ListItemIcon,
 } from '@mui/material';
 import { format } from 'date-fns';
 import { CVCardProps } from '@/types/cv';
@@ -24,11 +33,15 @@ import {
 	Visibility as VisibilityIcon,
 	Search,
 	Sort,
+	MoreVert as MoreVertIcon,
+	ViewList,
+	ViewModule,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
 type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc';
+type ViewMode = 'grid' | 'list';
 
 const sortOptions: { value: SortOption; label: string }[] = [
 	{ value: 'newest', label: 'Newest first' },
@@ -37,15 +50,44 @@ const sortOptions: { value: SortOption; label: string }[] = [
 	{ value: 'name-desc', label: 'Name (Z-A)' },
 ];
 
+interface CVListProps extends Omit<CVCardProps, 'cv'> {
+	cvs: CVCardProps['cv'][];
+	viewMode: ViewMode;
+	onViewModeChange: (mode: ViewMode) => void;
+}
+
 export function CVList({
 	cvs,
 	onPreview,
 	onEdit,
 	onDelete,
 	onDownload,
-}: { cvs: CVCardProps['cv'][] } & Omit<CVCardProps, 'cv'>) {
+	viewMode,
+	onViewModeChange,
+}: CVListProps) {
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 	const [searchQuery, setSearchQuery] = useState('');
 	const [sortBy, setSortBy] = useState<SortOption>('newest');
+	const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+	const [selectedCVId, setSelectedCVId] = useState<string | null>(null);
+
+	const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, cvId: string) => {
+		setMenuAnchorEl(event.currentTarget);
+		setSelectedCVId(cvId);
+	};
+
+	const handleMenuClose = () => {
+		setMenuAnchorEl(null);
+		setSelectedCVId(null);
+	};
+
+	const handleAction = (action: (id: string) => void) => {
+		if (selectedCVId) {
+			action(selectedCVId);
+			handleMenuClose();
+		}
+	};
 
 	const filteredAndSortedCVs = cvs
 		.filter((cv) => cv.title.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -64,126 +106,221 @@ export function CVList({
 			}
 		});
 
-	return (
-		<div className="space-y-4">
-			<Paper elevation={0} variant="outlined" className="p-4">
-				<div className="flex flex-col gap-4 sm:flex-row">
-					<TextField
-						placeholder="Search CVs..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						variant="outlined"
-						size="small"
-						fullWidth
-						InputProps={{
-							startAdornment: (
-								<InputAdornment position="start">
-									<Search className="text-gray-400" />
-								</InputAdornment>
-							),
-						}}
-						className="flex-grow sm:max-w-md"
-					/>
-					<FormControl size="small" className="w-full sm:w-48">
-						<InputLabel id="sort-select-label">Sort by</InputLabel>
-						<Select
-							labelId="sort-select-label"
-							value={sortBy}
-							label="Sort by"
-							onChange={(e) => setSortBy(e.target.value as SortOption)}
-							startAdornment={
-								<InputAdornment position="start">
-									<Sort className="text-gray-400" />
-								</InputAdornment>
-							}
-						>
-							{sortOptions.map((option) => (
-								<MenuItem key={option.value} value={option.value}>
-									{option.label}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
-				</div>
-			</Paper>
+	const renderCVCard = (cv: CVCardProps['cv'], index: number) => {
+		const cardContent = (
+			<>
+				<Typography variant="subtitle1" className="max-w-full truncate font-medium">
+					{cv.title || 'Untitled CV'}
+				</Typography>
+				<Typography variant="body2" color="text.secondary" className="truncate text-sm">
+					Last modified:{' '}
+					{format(new Date(cv.metadata?.lastModified || cv.updatedAt), 'MMM d, yyyy')}
+				</Typography>
+			</>
+		);
 
-			<Paper elevation={0} variant="outlined" className="overflow-hidden">
-				{filteredAndSortedCVs.length === 0 ? (
-					<div className="p-6 text-center">
-						<Typography variant="body1" color="text.secondary">
-							{searchQuery
-								? 'No CVs match your search criteria'
-								: 'No CVs found. Create your first CV to get started!'}
-						</Typography>
-						{searchQuery && (
-							<Typography variant="body2" color="text.secondary" className="mt-1">
-								Try adjusting your search or clear the filter to see all CVs
-							</Typography>
+		const actionButtons = isMobile ? (
+			<Box className="flex shrink-0 items-center">
+				<IconButton size="small" onClick={(e) => handleMenuOpen(e, cv.id)} color="primary">
+					<MoreVertIcon fontSize="small" />
+				</IconButton>
+			</Box>
+		) : (
+			<Box className="flex shrink-0 items-center space-x-2">
+				<Button
+					startIcon={<VisibilityIcon />}
+					onClick={() => onPreview(cv.id)}
+					size="small"
+					variant="text"
+					color="primary"
+				>
+					Preview
+				</Button>
+				<Button
+					startIcon={<EditIcon />}
+					onClick={() => onEdit(cv.id)}
+					size="small"
+					variant="text"
+					color="primary"
+				>
+					Edit
+				</Button>
+				<Button
+					startIcon={<DownloadIcon />}
+					onClick={() => onDownload(cv.id)}
+					size="small"
+					variant="text"
+					color="primary"
+				>
+					Download
+				</Button>
+				<Button
+					startIcon={<DeleteIcon />}
+					onClick={() => onDelete(cv.id)}
+					size="small"
+					variant="text"
+					color="error"
+				>
+					Delete
+				</Button>
+			</Box>
+		);
+
+		if (viewMode === 'grid') {
+			return (
+				<Grid item xs={12} sm={6} md={4} key={cv.id}>
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, height: 0 }}
+						transition={{ duration: 0.2, delay: index * 0.05 }}
+					>
+						<Card className="h-full overflow-hidden">
+							<CardContent className="pb-2">{cardContent}</CardContent>
+							<CardActions className="justify-end px-2 pb-2">{actionButtons}</CardActions>
+						</Card>
+					</motion.div>
+				</Grid>
+			);
+		}
+
+		return (
+			<motion.div
+				key={cv.id}
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				exit={{ opacity: 0, height: 0 }}
+				transition={{ duration: 0.2, delay: index * 0.05 }}
+				className="w-full"
+			>
+				<ListItem className="flex items-center justify-between py-2">
+					<Box className="min-w-0 flex-grow overflow-hidden">{cardContent}</Box>
+					{actionButtons}
+				</ListItem>
+				{index < filteredAndSortedCVs.length - 1 && <Divider />}
+			</motion.div>
+		);
+	};
+
+	return (
+		<Box className="w-full overflow-hidden">
+			<Box className="max-w-full px-4 md:px-6">
+				<Grid container spacing={2}>
+					<Grid item xs={12}>
+						<Box className="flex flex-col items-center gap-4 sm:flex-row" mt={1}>
+							<Box className="flex w-full flex-grow flex-col gap-4 sm:flex-row">
+								<TextField
+									placeholder="Search CVs..."
+									variant="outlined"
+									size="small"
+									className="w-full sm:max-w-md"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment position="start">
+												<Search className="text-gray-400" fontSize="small" />
+											</InputAdornment>
+										),
+									}}
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
+								/>
+								<FormControl variant="outlined" size="small" className="w-full sm:w-[200px]">
+									<InputLabel id="sort-select-label">Sort by</InputLabel>
+									<Select
+										labelId="sort-select-label"
+										value={sortBy}
+										onChange={(e) => setSortBy(e.target.value as SortOption)}
+										label="Sort by"
+									>
+										{sortOptions.map((option) => (
+											<MenuItem key={option.value} value={option.value}>
+												{option.label}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Box>
+							<Button
+								variant="outlined"
+								size="medium"
+								onClick={() => onViewModeChange(viewMode === 'grid' ? 'list' : 'grid')}
+								className="w-full whitespace-nowrap sm:w-auto"
+								startIcon={viewMode === 'grid' ? <ViewList /> : <ViewModule />}
+							>
+								{viewMode === 'grid' ? 'List View' : 'Grid View'}
+							</Button>
+						</Box>
+					</Grid>
+
+					<Grid item xs={12} className="overflow-hidden">
+						{filteredAndSortedCVs.length === 0 ? (
+							<Box className="p-4 text-center">
+								<Typography variant="body1" color="text.secondary">
+									{searchQuery
+										? 'No CVs match your search criteria'
+										: 'No CVs found. Create your first CV to get started!'}
+								</Typography>
+								{searchQuery && (
+									<Typography variant="body2" color="text.secondary" className="mt-1">
+										Try adjusting your search or clear the filter to see all CVs
+									</Typography>
+								)}
+							</Box>
+						) : viewMode === 'grid' ? (
+							<Grid container spacing={2} className="w-full">
+								<AnimatePresence mode="popLayout">
+									{filteredAndSortedCVs.map((cv, index) => renderCVCard(cv, index))}
+								</AnimatePresence>
+							</Grid>
+						) : (
+							<List className="w-full">
+								<AnimatePresence mode="popLayout">
+									{filteredAndSortedCVs.map((cv, index) => renderCVCard(cv, index))}
+								</AnimatePresence>
+							</List>
 						)}
-					</div>
-				) : (
-					<List className="p-0">
-						<AnimatePresence mode="popLayout">
-							{filteredAndSortedCVs.map((cv, index) => (
-								<motion.div
-									key={cv.id}
-									initial={{ opacity: 0, y: 20 }}
-									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, height: 0 }}
-									transition={{ duration: 0.2, delay: index * 0.05 }}
-								>
-									<ListItem className="flex items-center py-3">
-										<div className="min-w-0 flex-grow">
-											<Typography variant="subtitle1" className="font-medium">
-												{cv.title || 'Untitled CV'}
-											</Typography>
-											<Typography variant="body2" className="text-gray-500">
-												Last modified:{' '}
-												{format(new Date(cv.metadata?.lastModified || cv.updatedAt), 'MMM d, yyyy')}
-											</Typography>
-										</div>
-										<div className="ml-4 flex items-center gap-2">
-											<Button
-												startIcon={<VisibilityIcon />}
-												onClick={() => onPreview(cv.id)}
-												size="small"
-												className="text-gray-700 hover:text-blue-600"
-											>
-												Preview
-											</Button>
-											<Button
-												startIcon={<EditIcon />}
-												onClick={() => onEdit(cv.id)}
-												size="small"
-												className="text-gray-700 hover:text-blue-600"
-											>
-												Edit
-											</Button>
-											<Button
-												startIcon={<DownloadIcon />}
-												onClick={() => onDownload(cv.id)}
-												size="small"
-												className="text-gray-700 hover:text-blue-600"
-											>
-												Download
-											</Button>
-											<Button
-												startIcon={<DeleteIcon />}
-												onClick={() => onDelete(cv.id)}
-												size="small"
-												className="text-red-600 hover:text-red-700"
-											>
-												Delete
-											</Button>
-										</div>
-									</ListItem>
-									{index < filteredAndSortedCVs.length - 1 && <Divider />}
-								</motion.div>
-							))}
-						</AnimatePresence>
-					</List>
-				)}
-			</Paper>
-		</div>
+					</Grid>
+				</Grid>
+			</Box>
+
+			<Menu
+				anchorEl={menuAnchorEl}
+				open={Boolean(menuAnchorEl)}
+				onClose={handleMenuClose}
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'right',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+			>
+				<MenuItem onClick={() => handleAction(onPreview)}>
+					<ListItemIcon>
+						<VisibilityIcon fontSize="small" />
+					</ListItemIcon>
+					Preview
+				</MenuItem>
+				<MenuItem onClick={() => handleAction(onEdit)}>
+					<ListItemIcon>
+						<EditIcon fontSize="small" />
+					</ListItemIcon>
+					Edit
+				</MenuItem>
+				<MenuItem onClick={() => handleAction(onDownload)}>
+					<ListItemIcon>
+						<DownloadIcon fontSize="small" />
+					</ListItemIcon>
+					Download
+				</MenuItem>
+				<MenuItem onClick={() => handleAction(onDelete)} className="text-red-600">
+					<ListItemIcon>
+						<DeleteIcon fontSize="small" className="text-red-600" />
+					</ListItemIcon>
+					Delete
+				</MenuItem>
+			</Menu>
+		</Box>
 	);
 }
