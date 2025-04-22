@@ -133,13 +133,56 @@ export function CVList({
 							<Divider />
 							<CardActions>
 								{isMobile ? (
-									<Box className="flex justify-end p-2">
+									<Box
+										className="flex space-x-1 p-2"
+										sx={{
+											justifyContent: 'space-evenly',
+											width: '100%',
+										}}
+									>
 										<IconButton
 											size="small"
-											onClick={(e) => handleMenuOpen(e, cv.id)}
+											sx={{
+												width: '28px',
+												height: '28px',
+											}}
+											onClick={() => onPreview(cv.id)}
 											color="primary"
 										>
-											<MoreVertIcon fontSize="small" />
+											<VisibilityIcon fontSize="small" />
+										</IconButton>
+										<IconButton
+											size="small"
+											sx={{
+												width: '28px',
+												height: '28px',
+											}}
+											onClick={() => onEdit(cv.id)}
+											color="primary"
+										>
+											<EditIcon fontSize="small" />
+										</IconButton>
+										<IconButton
+											size="small"
+											sx={{
+												width: '28px',
+												height: '28px',
+											}}
+											onClick={() => onDownload(cv.id)}
+											color="primary"
+										>
+											<DownloadIcon fontSize="small" />
+										</IconButton>
+										<IconButton
+											size="small"
+											sx={{
+												width: '28px',
+												height: '28px',
+											}}
+											onClick={() => onDelete(cv.id)}
+											color="error"
+										>
+											<DeleteIcon fontSize="small" />
 										</IconButton>
 									</Box>
 								) : (
