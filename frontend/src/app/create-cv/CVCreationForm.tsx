@@ -1,37 +1,36 @@
 'use client';
 
+import Notification from '@/components/UI/Notification/Notification';
 import { useCreateCV } from '@/hooks/useCreateCV';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+	Alert,
+	Autocomplete,
 	Box,
 	Button,
-	Container,
-	Typography,
-	Alert,
-	Paper,
-	Fade,
+	Chip,
 	CircularProgress,
-	Stepper,
+	Container,
+	Fade,
+	LinearProgress,
+	Paper,
 	Step,
 	StepLabel,
-	LinearProgress,
-	Autocomplete,
+	Stepper,
 	TextField,
-	Chip,
+	Typography,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import CertificationItem from './parts/CertificationItem';
 import EducationItem from './parts/EducationItem';
 import FormInput from './parts/FormInput';
 import { FormData, schema } from './parts/schema/schema';
 import { stepFieldGroups, steps } from './parts/steps/steps';
 import WorkExperienceItem from './parts/WorkExperienceItem/WorkExperienceItem';
-import Notification from '@/components/UI/Notification/Notification';
-import { useRouter } from 'next/navigation';
-import { Controller } from 'react-hook-form';
-import CertificationItem from './parts/CertificationItem';
 
 interface ErrorResponse {
 	message: string;

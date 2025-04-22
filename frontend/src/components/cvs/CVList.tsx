@@ -1,43 +1,41 @@
 'use client';
 
-import {
-	List,
-	ListItem,
-	Button,
-	Divider,
-	Typography,
-	Paper,
-	TextField,
-	InputAdornment,
-	Select,
-	MenuItem,
-	FormControl,
-	InputLabel,
-	Grid,
-	Card,
-	CardContent,
-	CardActions,
-	IconButton,
-	Box,
-	useMediaQuery,
-	useTheme,
-	Menu,
-	ListItemIcon,
-} from '@mui/material';
-import { format } from 'date-fns';
 import { CVCardProps } from '@/types/cv';
 import {
-	Edit as EditIcon,
 	Delete as DeleteIcon,
 	Download as DownloadIcon,
-	Visibility as VisibilityIcon,
-	Search,
-	Sort,
+	Edit as EditIcon,
 	MoreVert as MoreVertIcon,
+	Search,
 	ViewList,
 	ViewModule,
+	Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+	Box,
+	Button,
+	Card,
+	CardActions,
+	CardContent,
+	Divider,
+	FormControl,
+	Grid,
+	IconButton,
+	InputAdornment,
+	InputLabel,
+	List,
+	ListItem,
+	ListItemIcon,
+	Menu,
+	MenuItem,
+	Select,
+	TextField,
+	Typography,
+	useMediaQuery,
+	useTheme,
+} from '@mui/material';
+import { format } from 'date-fns';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 
 type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc';

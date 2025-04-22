@@ -1,7 +1,7 @@
-import { Suspense } from 'react';
 import { CVsClient } from '@/components/cvs/CVsClient';
 import { CVService } from '@/services/cvService';
 import { Container } from '@mui/material';
+import { Suspense } from 'react';
 
 export default async function CVsPage() {
 	const initialCVs = await CVService.getCVs();
