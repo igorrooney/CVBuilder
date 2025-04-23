@@ -1,26 +1,14 @@
 'use client';
 
-import {
-	Card,
-	CardContent,
-	Typography,
-	Box,
-	IconButton,
-	Tooltip,
-	CardMedia,
-	Stack,
-	Button,
-	ButtonBase,
-} from '@mui/material';
-import { format } from 'date-fns';
 import { CVCardProps } from '@/types/cv';
-import Image from 'next/image';
 import {
-	Edit as EditIcon,
 	Delete as DeleteIcon,
 	Download as DownloadIcon,
+	Edit as EditIcon,
 	Visibility as VisibilityIcon,
 } from '@mui/icons-material';
+import { Box, ButtonBase, Card, CardContent, CardMedia, Stack, Typography } from '@mui/material';
+import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 
 const MotionCard = motion(Card);

@@ -1,7 +1,7 @@
-import { CV } from '@/types/cv';
 import { databases } from '@/lib/appwrite/client';
 import { appwriteConfig } from '@/lib/appwrite/config';
-import { Query, Models } from 'appwrite';
+import { CV } from '@/types/cv';
+import { Query } from 'appwrite';
 
 export class CVService {
 	static async getCVs(): Promise<CV[]> {

@@ -32,6 +32,7 @@ const sortOptions: { value: SortOption; label: string }[] = [
 export function CVsView({ cvs, onPreview, onEdit, onDelete, onDownload }: CVsViewProps) {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [sortBy, setSortBy] = useState<SortOption>('newest');
+	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
 	const filteredAndSortedCVs = cvs
 		.filter((cv) => cv.title.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -113,6 +114,8 @@ export function CVsView({ cvs, onPreview, onEdit, onDelete, onDownload }: CVsVie
 				onEdit={onEdit}
 				onDelete={onDelete}
 				onDownload={onDownload}
+				viewMode={viewMode}
+				onViewModeChange={setViewMode}
 			/>
 
 			{filteredAndSortedCVs.length === 0 && searchQuery && (

@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-// British phone number regex
-const britishPhoneRegex = /^(\+44|0)7\d{9}$/;
-
 export const schema = z.object({
 	title: z
 		.string()

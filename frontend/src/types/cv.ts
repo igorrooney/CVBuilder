@@ -12,10 +12,10 @@ export interface CV {
 }
 
 export interface CVActions {
-	onPreview: (id: string) => void;
-	onEdit: (id: string) => void;
-	onDelete: (id: string) => void;
-	onDownload: (id: string) => void;
+	onPreview: (id: string) => Promise<void>;
+	onEdit: (id: string) => Promise<void>;
+	onDelete: (id: string) => Promise<void>;
+	onDownload: (id: string) => Promise<void>;
 }
 
 export interface CVCardProps extends CVActions {

@@ -19,8 +19,8 @@ export function CVsClient({ initialCVs }: CVsClientProps) {
 	const [cvs, setCvs] = useState<CV[]>(initialCVs);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
-	const handlePreview = (id: string) => router.push(`/cvs/${id}/preview`);
-	const handleEdit = (id: string) => router.push(`/cvs/${id}/edit`);
+	const handlePreview = async (id: string) => router.push(`/cvs/${id}/preview`);
+	const handleEdit = async (id: string) => router.push(`/cvs/${id}/edit`);
 	const handleDelete = async (id: string) => {
 		await CVService.deleteCV(id);
 		setCvs(cvs.filter((cv) => cv.id !== id));
