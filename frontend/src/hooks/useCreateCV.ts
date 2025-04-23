@@ -86,6 +86,7 @@ export function useCreateCV() {
 					ID.unique(),
 					{
 						userId: currentUser.$id,
+						title: data.title,
 						firstName: data.firstName,
 						lastName: data.lastName,
 						email: data.email,

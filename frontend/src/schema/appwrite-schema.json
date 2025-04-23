@@ -143,6 +143,18 @@
           "twoWayKey": "67e8518700300a2cb101",
           "onDelete": "cascade",
           "side": "parent"
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2025-04-18T23:48:42.639+00:00",
+          "$updatedAt": "2025-04-18T23:48:43.005+00:00",
+          "size": 255,
+          "default": null
         }
       ],
       "indexes": []
