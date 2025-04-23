@@ -52,6 +52,7 @@ interface CVListProps extends Omit<CVCardProps, 'cv'> {
 	cvs: CVCardProps['cv'][];
 	viewMode: ViewMode;
 	onViewModeChange: (mode: ViewMode) => void;
+	isLoading?: boolean;
 }
 
 export function CVList({

@@ -26,6 +26,7 @@ export interface CVListProps extends CVActions {
 	cvs: CV[];
 	viewMode: 'grid' | 'list';
 	onViewModeChange: (mode: 'grid' | 'list') => void;
+	isLoading?: boolean;
 }
 
 export interface CVFormData {
