@@ -4,15 +4,20 @@ import { CV } from '@/types/cv';
 import { Query } from 'appwrite';
 
 export class CVService {
-	static async getCVs(): Promise<CV[]> {
+	static async getCVs(
+		page: number = 1,
+		limit: number = 10,
+	): Promise<{ documents: CV[]; total: number }> {
 		try {
+			const offset = (page - 1) * limit;
 			const response = await databases.listDocuments(
 				appwriteConfig.databaseId,
 				appwriteConfig.cvsCollectionId,
-				[Query.orderDesc('$updatedAt'), Query.limit(100)],
+				[Query.orderDesc('$updatedAt'), Query.limit(limit), Query.offset(offset)],
 			);
 
-			return response.documents.map((doc: any) => {
+			const total = response.total;
+			const documents = response.documents.map((doc: any) => {
 				const metadata = doc.metadata || {};
 				return {
 					id: doc.$id,
@@ -28,6 +33,8 @@ export class CVService {
 					},
 				};
 			});
+
+			return { documents, total };
 		} catch (error: any) {
 			console.error('Error fetching CVs:', error);
 			if (error?.code === 401) {

@@ -4,12 +4,12 @@ import { Container } from '@mui/material';
 import { Suspense } from 'react';
 
 export default async function CVsPage() {
-	const initialCVs = await CVService.getCVs();
+	const { documents: initialCVs, total: initialTotal } = await CVService.getCVs(1, 10);
 
 	return (
 		<Container maxWidth="lg" className="py-8">
 			<Suspense fallback={<div>Loading...</div>}>
-				<CVsClient initialCVs={initialCVs} />
+				<CVsClient initialCVs={initialCVs} initialTotal={initialTotal} />
 			</Suspense>
 		</Container>
 	);
