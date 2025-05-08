@@ -17,22 +17,24 @@ export class CVService {
 			);
 
 			const total = response.total;
-			const documents = response.documents.map((doc: any) => {
-				const metadata = doc.metadata || {};
-				return {
-					id: doc.$id,
-					title: doc.title || 'Untitled CV',
-					createdAt: new Date(doc.$createdAt),
-					updatedAt: new Date(doc.$updatedAt),
-					status: doc.status || 'draft',
-					thumbnail: doc.thumbnail || null,
-					metadata: {
-						language: metadata.language || undefined,
-						template: metadata.template || undefined,
-						lastModified: metadata.lastModified ? new Date(metadata.lastModified) : undefined,
-					},
-				};
-			});
+			const documents = response.documents.map((doc: any) => ({
+				id: doc.$id,
+				title: doc.title || 'Untitled CV',
+				firstName: doc.firstName || '',
+				lastName: doc.lastName || '',
+				email: doc.email || '',
+				phoneNumber: doc.phoneNumber || '',
+				address: doc.address || '',
+				summary: doc.summary || '',
+				experience: doc.experience || [],
+				education: doc.education || [],
+				skills: doc.skills || [],
+				languages: doc.languages || [],
+				certifications: doc.certifications || [],
+				hobbies: doc.hobbies || '',
+				createdAt: doc.$createdAt,
+				updatedAt: doc.$updatedAt,
+			}));
 
 			return { documents, total };
 		} catch (error: any) {
@@ -45,6 +47,32 @@ export class CVService {
 			}
 			throw new Error('Failed to fetch CVs. Please try again later.');
 		}
+	}
+
+	static async getCVById(id: string): Promise<CV> {
+		const doc = await databases.getDocument(
+			appwriteConfig.databaseId,
+			appwriteConfig.cvsCollectionId,
+			id,
+		);
+		return {
+			id: doc.$id,
+			title: doc.title || 'Untitled CV',
+			firstName: doc.firstName || '',
+			lastName: doc.lastName || '',
+			email: doc.email || '',
+			phoneNumber: doc.phoneNumber || '',
+			address: doc.address || '',
+			summary: doc.summary || '',
+			experience: doc.experience || [],
+			education: doc.education || [],
+			skills: doc.skills || [],
+			languages: doc.languages || [],
+			certifications: doc.certifications || [],
+			hobbies: doc.hobbies || '',
+			createdAt: doc.$createdAt,
+			updatedAt: doc.$updatedAt,
+		};
 	}
 
 	static async deleteCV(id: string): Promise<void> {
