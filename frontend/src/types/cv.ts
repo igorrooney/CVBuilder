@@ -53,6 +53,10 @@ export interface CV {
 	hobbies?: string[] | string;
 	createdAt: string;
 	updatedAt: string;
+	thumbnail?: string;
+	metadata?: {
+		lastModified?: string;
+	};
 }
 
 export interface CVActions {

@@ -67,7 +67,7 @@ export function CVCard({ cv, onPreview, onEdit, onDelete, onDownload }: CVCardPr
 				<CardMedia
 					component="img"
 					height="176"
-					image={cv.thumbnail || '/placeholder-cv.png'}
+					image={cv.thumbnail ?? '/placeholder-cv.png'}
 					alt={cv.title}
 					className="h-full w-full object-cover"
 				/>

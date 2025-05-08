@@ -10,7 +10,6 @@ import StarIcon from '@mui/icons-material/Star';
 import LanguageIcon from '@mui/icons-material/Language';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import InfoIcon from '@mui/icons-material/Info';
-import { Box, Typography } from '@mui/material';
 
 interface CVPreviewButtonProps {
 	cv: CV;
