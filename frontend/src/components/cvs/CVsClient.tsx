@@ -12,12 +12,15 @@ import {
 	Select,
 	SelectChangeEvent,
 	Typography,
+	CircularProgress,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CVList } from './CVList';
+import { PreviewModal } from '../UI/PreviewModal';
+import { CVPreviewButton } from './CVPreviewButton';
 
 interface CVsClientProps {
 	initialCVs: CV[];
@@ -32,8 +35,10 @@ export function CVsClient({ initialCVs, initialTotal }: CVsClientProps) {
 	const [total, setTotal] = useState(initialTotal);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage, setItemsPerPage] = useState(10);
-	const [isLoading, setIsLoading] = useState(false);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+	const [isLoading, setIsLoading] = useState(false);
+	const [selectedCV, setSelectedCV] = useState<CV | null>(null);
+	const [isPreviewLoading, setIsPreviewLoading] = useState(false);
 
 	const fetchCVs = async (page: number, limit: number) => {
 		setIsLoading(true);
@@ -59,7 +64,19 @@ export function CVsClient({ initialCVs, initialTotal }: CVsClientProps) {
 		fetchCVs(1, newItemsPerPage);
 	};
 
-	const handlePreview = async (id: string) => router.push(`/cvs/${id}/preview`);
+	const handlePreview = async (id: string) => {
+		try {
+			setIsPreviewLoading(true);
+			const cv = await CVService.getCVById(id);
+			setSelectedCV(cv);
+		} catch (error) {
+			console.error('Error loading CV preview:', error);
+			// TODO: Show error notification
+		} finally {
+			setIsPreviewLoading(false);
+		}
+	};
+
 	const handleEdit = async (id: string) => router.push(`/cvs/${id}/edit`);
 	const handleDelete = async (id: string) => {
 		await CVService.deleteCV(id);
@@ -139,6 +156,22 @@ export function CVsClient({ initialCVs, initialTotal }: CVsClientProps) {
 						showLastButton
 					/>
 				</Box>
+			)}
+
+			{(isPreviewLoading || selectedCV) && (
+				<PreviewModal
+					isOpen={isPreviewLoading || !!selectedCV}
+					onClose={() => setSelectedCV(null)}
+					title={selectedCV?.title || 'CV Preview'}
+				>
+					{isPreviewLoading ? (
+						<Box className="flex h-64 items-center justify-center">
+							<CircularProgress />
+						</Box>
+					) : (
+						selectedCV && <CVPreviewButton cv={selectedCV} />
+					)}
+				</PreviewModal>
 			)}
 		</motion.div>
 	);

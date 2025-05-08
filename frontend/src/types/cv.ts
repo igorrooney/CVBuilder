@@ -1,14 +1,58 @@
+export interface PersonalInfo {
+	fullName?: string;
+	email?: string;
+	phone?: string;
+	location?: string;
+	website?: string;
+	summary?: string;
+}
+
+export interface Experience {
+	jobTitle: string;
+	company: string;
+	location?: string;
+	startDate: string;
+	endDate?: string;
+	responsibilities?: string;
+	achievements?: string[] | string;
+	isCurrent?: boolean;
+}
+
+export interface Education {
+	degree: string;
+	institution: string;
+	location?: string;
+	graduationYear: string;
+	gpa?: string;
+}
+
+export interface Certification {
+	name: string;
+	issuingOrganization: string;
+	issueDate: string;
+	expiryDate?: string;
+	credentialId?: string;
+	credentialUrl?: string;
+}
+
 export interface CV {
 	id: string;
 	title: string;
-	createdAt: Date;
-	updatedAt: Date;
-	thumbnail?: string | null;
-	metadata?: {
-		language?: string;
-		template?: string;
-		lastModified?: Date;
-	};
+	firstName?: string;
+	lastName?: string;
+	email?: string;
+	phoneNumber?: string;
+	address?: string;
+	summary?: string;
+	personalInfo?: PersonalInfo;
+	experience?: Experience[];
+	education?: Education[];
+	skills?: string[] | string;
+	languages?: string[];
+	certifications?: Certification[];
+	hobbies?: string[] | string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface CVActions {
