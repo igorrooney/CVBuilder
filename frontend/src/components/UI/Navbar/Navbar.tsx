@@ -7,10 +7,12 @@ import { useLoggedInUser } from '@/hooks/useLoggedInUser';
 import { Box, CircularProgress } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
 
 export default function Navbar() {
 	const { user, isLoading } = useLoggedInUser();
+	const pathname = usePathname();
 
 	if (isLoading) {
 		return (
@@ -53,13 +55,13 @@ export default function Navbar() {
 							<>
 								<Link
 									href="/login"
-									className="mr-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-800 lg:px-5 lg:py-2.5"
+									className="mr-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 lg:px-5 lg:py-2.5 dark:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-800"
 								>
 									Log in
 								</Link>
 								<Link
 									href="/register"
-									className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800 lg:px-5 lg:py-2.5"
+									className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 lg:px-5 lg:py-2.5 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
 								>
 									Get started
 								</Link>
@@ -78,7 +80,11 @@ export default function Navbar() {
 							<li>
 								<Link
 									href="/"
-									className="block rounded bg-indigo-600 py-2 pl-3 pr-4 text-white lg:bg-transparent lg:p-0 lg:text-indigo-600"
+									className={`block rounded py-2 pl-3 pr-4 lg:bg-transparent lg:p-0 ${
+										pathname === '/'
+											? 'font-semibold text-indigo-600'
+											: 'text-gray-700 hover:text-indigo-600'
+									}`}
 								>
 									Home
 								</Link>
@@ -86,15 +92,23 @@ export default function Navbar() {
 							<li>
 								<Link
 									href="/create-cv"
-									className="block py-2 pl-3 pr-4 text-gray-700 hover:bg-gray-50 lg:p-0 lg:hover:bg-transparent lg:hover:text-indigo-600"
+									className={`block py-2 pl-3 pr-4 lg:p-0 ${
+										pathname.startsWith('/create-cv')
+											? 'font-semibold text-indigo-600'
+											: 'text-gray-700 hover:text-indigo-600'
+									}`}
 								>
 									Create CV
 								</Link>
 							</li>
 							<li>
 								<Link
-									href="/my-cvs"
-									className="block py-2 pl-3 pr-4 text-gray-700 hover:bg-gray-50 lg:p-0 lg:hover:bg-transparent lg:hover:text-indigo-600"
+									href="/cvs"
+									className={`block py-2 pl-3 pr-4 lg:p-0 ${
+										pathname.startsWith('/cvs') || pathname.startsWith('/my-cvs')
+											? 'font-semibold text-indigo-600'
+											: 'text-gray-700 hover:text-indigo-600'
+									}`}
 								>
 									My CVs
 								</Link>

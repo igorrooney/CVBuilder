@@ -1,7 +1,11 @@
 'use client';
 
-import { Dialog, Button, Typography, Box, AlertColor } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import InfoIcon from '@mui/icons-material/Info';
+import WarningIcon from '@mui/icons-material/Warning';
+import { AlertColor, Box, Button, Dialog, Typography } from '@mui/material';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface NotificationProps {
 	open: boolean;
@@ -9,77 +13,88 @@ interface NotificationProps {
 	message: string;
 	severity?: AlertColor;
 	autoHideDuration?: number;
+	title?: string;
+	buttonText?: string;
 }
 
-export default function Notification({ open, onClose, message }: NotificationProps) {
+const iconMap = {
+	success: <CheckCircleIcon className="text-green-600" fontSize="large" />,
+	error: <ErrorIcon className="text-red-600" fontSize="large" />,
+	info: <InfoIcon className="text-blue-600" fontSize="large" />,
+	warning: <WarningIcon className="text-yellow-600" fontSize="large" />,
+};
+
+const titleMap = {
+	success: 'Success!',
+	error: 'Error',
+	info: 'Info',
+	warning: 'Warning',
+};
+
+export default function Notification({
+	open,
+	onClose,
+	message,
+	severity = 'success',
+	title,
+	buttonText = 'Continue',
+}: NotificationProps) {
 	return (
 		<AnimatePresence>
 			{open && (
 				<Dialog
 					open={open}
 					onClose={(_, reason) => {
-						if (reason !== 'backdropClick') {
-							onClose();
-						}
+						if (reason !== 'backdropClick') onClose();
 					}}
 					maxWidth="xs"
+					aria-labelledby="notification-modal-title"
+					aria-describedby="notification-modal-description"
 					PaperProps={{
 						component: motion.div,
-						initial: { opacity: 0, y: 20 },
+						initial: { opacity: 0, y: 24 },
 						animate: { opacity: 1, y: 0 },
-						exit: { opacity: 0, y: 20 },
-						transition: { duration: 0.2 },
-						sx: {
-							borderRadius: 1,
-							overflow: 'hidden',
-							minWidth: '320px',
-							bgcolor: '#ffffff',
-						},
+						exit: { opacity: 0, y: 24 },
+						transition: { duration: 0.22 },
+						className: 'rounded-2xl shadow-2xl p-0 bg-white',
+						sx: { minWidth: 320, maxWidth: 400 },
 					}}
 				>
-					<Box sx={{ p: 3 }}>
-						<Box sx={{ textAlign: 'center', pb: 3 }}>
-							<Typography
-								variant="h6"
-								component="h2"
-								sx={{
-									fontSize: '1.25rem',
-									fontWeight: 600,
-									color: '#2E7D32',
-									mb: 1,
-								}}
-							>
-								Success!
-							</Typography>
-							<Typography
-								variant="body1"
-								sx={{
-									color: 'grey.600',
-									fontSize: '0.975rem',
-								}}
-							>
-								{message}
-							</Typography>
-						</Box>
-
-						<Button
-							fullWidth
-							variant="contained"
-							onClick={onClose}
-							sx={{
-								'py': 1.5,
-								'bgcolor': '#2E7D32',
-								'&:hover': {
-									bgcolor: '#1B5E20',
-								},
-								'textTransform': 'none',
-								'fontSize': '1rem',
-								'fontWeight': 500,
-								'boxShadow': 'none',
-								'borderRadius': 1,
-							}}
+					<Box className="flex flex-col items-center px-6 pb-4 pt-8">
+						<span aria-hidden="true">{iconMap[severity]}</span>
+						<Typography
+							id="notification-modal-title"
+							variant="h6"
+							className={`mt-2 text-center font-bold ${
+								severity === 'success'
+									? 'text-green-700'
+									: severity === 'error'
+										? 'text-red-700'
+										: severity === 'info'
+											? 'text-blue-700'
+											: 'text-yellow-700'
+							}`}
 						>
-							Continue
+							{title || titleMap[severity]}
+						</Typography>
+						<Typography
+							id="notification-modal-description"
+							className="mt-1 text-center text-base text-gray-600"
+						>
+							{message}
+						</Typography>
+						<Button
+							onClick={onClose}
+							variant="contained"
+							color={
+								severity === 'success' ? 'success' : severity === 'error' ? 'error' : 'primary'
+							}
+							className="!mt-6 !rounded-lg !px-8 !py-2 !text-base !font-medium"
+							disableElevation
+							fullWidth
+							autoFocus
+						>
+							{buttonText}
 						</Button>
 					</Box>
 				</Dialog>

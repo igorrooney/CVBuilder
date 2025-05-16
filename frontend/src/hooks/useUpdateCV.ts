@@ -1,49 +1,22 @@
-'use client';
-
 import { FormData } from '@/app/create-cv/parts/schema/schema';
 import { account, databases } from '@/lib/appwrite';
-import { useMutation } from '@tanstack/react-query';
-import { ID, Models } from 'appwrite';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Models } from 'appwrite';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export interface CVCreationFormData {
-	firstName: string;
-	lastName: string;
-	email: string;
-	phoneNumber: string;
-	address: string;
-	summary: string;
-	skills: string[];
-	hobbies: string[];
-	experience: {
-		jobTitle: string;
-		company: string;
-		startDate: string;
-		endDate: string;
-		responsibilities: string[];
-		achievements: string[];
-		isCurrent: boolean;
-	}[];
-	education: {
-		degree: string;
-		institution: string;
-		graduationYear: string;
-	}[];
-}
-
-export interface CreateCVResult {
+export interface UpdateCVResult {
 	cv: Models.Document;
 	experienceDocs: Models.Document[];
 	educationDocs: Models.Document[];
 }
 
-interface CVCreationResponse {
+interface UpdateCVResponse {
 	success: boolean;
 	message: string;
 }
 
-export function useCreateCV() {
+export function useUpdateCV(cvId: string) {
 	const [showSuccess, setShowSuccess] = useState(false);
 	const [notification, setNotification] = useState({
 		open: false,
@@ -51,24 +24,24 @@ export function useCreateCV() {
 		severity: 'success' as 'success' | 'error' | 'warning' | 'info',
 	});
 	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	const {
-		mutate: createCV,
+		mutate: updateCV,
 		isPending,
 		isError,
 		error,
 		isSuccess,
-	} = useMutation<CVCreationResponse, Error, FormData>({
+	} = useMutation<UpdateCVResponse, Error, FormData>({
 		mutationFn: async (data) => {
 			try {
 				// Get current user with proper error handling
-				let currentUser;
 				try {
-					currentUser = await account.get();
+					await account.get();
 				} catch (error: any) {
 					if (error.code === 401) {
-						router.push('/login?callbackUrl=/create-cv');
-						throw new Error('Please log in to create a CV');
+						router.push('/login?callbackUrl=/cvs');
+						throw new Error('Please log in to update your CV');
 					}
 					throw error;
 				}
@@ -78,13 +51,12 @@ export function useCreateCV() {
 					? data.skills.filter((skill) => skill && typeof skill === 'string').join(', ')
 					: '';
 
-				// Create the main CV document only
-				await databases.createDocument(
+				// Update the main CV document only
+				await databases.updateDocument(
 					process.env.NEXT_PUBLIC_APPWRITE_DATABASE!,
 					process.env.NEXT_PUBLIC_APPWRITE_CVS_COLLECTION!,
-					ID.unique(),
+					cvId,
 					{
-						userId: currentUser.$id,
 						title: data.title,
 						firstName: data.firstName,
 						lastName: data.lastName,
@@ -99,17 +71,16 @@ export function useCreateCV() {
 
 				return {
 					success: true,
-					message: 'CV created successfully',
+					message: 'CV updated successfully',
 				};
 			} catch (error: any) {
-				console.error('Error creating CV:', error);
-				// Provide more specific error messages
+				console.error('Error updating CV:', error);
 				if (error.code === 401) {
-					throw new Error('Please log in to create a CV');
+					throw new Error('Please log in to update your CV');
 				} else if (error.message) {
 					throw new Error(error.message);
 				} else {
-					throw new Error('Failed to create CV. Please try again.');
+					throw new Error('Failed to update CV. Please try again.');
 				}
 			}
 		},
@@ -117,14 +88,16 @@ export function useCreateCV() {
 			setShowSuccess(true);
 			setNotification({
 				open: true,
-				message: 'CV created successfully!',
+				message: 'CV updated successfully!',
 				severity: 'success',
 			});
+			// Invalidate and refetch CV data
+			queryClient.invalidateQueries({ queryKey: ['cv', cvId] });
 		},
 		onError: (error: Error) => {
 			setNotification({
 				open: true,
-				message: error.message || 'Failed to create CV',
+				message: error.message || 'Failed to update CV',
 				severity: 'error',
 			});
 		},
@@ -135,8 +108,8 @@ export function useCreateCV() {
 	};
 
 	return {
-		createCV: async (data: FormData) => {
-			await createCV(data);
+		updateCV: async (data: FormData) => {
+			await updateCV(data);
 		},
 		isPending,
 		isError,
