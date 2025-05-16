@@ -2,6 +2,8 @@
 
 import Notification from '@/components/UI/Notification/Notification';
 import { useCreateCV } from '@/hooks/useCreateCV';
+import { CVData, transformCVToFormData } from '@/hooks/useCV';
+import { useUpdateCV } from '@/hooks/useUpdateCV';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	Alert,
@@ -32,29 +34,51 @@ import { FormData, schema } from './parts/schema/schema';
 import { stepFieldGroups, steps } from './parts/steps/steps';
 import WorkExperienceItem from './parts/WorkExperienceItem/WorkExperienceItem';
 
-interface ErrorResponse {
-	message: string;
-}
-
 interface CVCreationFormProps {
 	onStepChange?: (step: number) => void;
+	mode?: 'create' | 'edit';
+	initialData?: CVData;
+	cvId?: string;
 }
 
-const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
+const CVCreationForm = ({
+	onStepChange,
+	mode = 'create',
+	initialData,
+	cvId,
+}: CVCreationFormProps) => {
 	const [activeStep, setActiveStep] = useState(0);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const { createCV, isError, error, showSuccess, setShowSuccess, isPending } = useCreateCV();
+	const {
+		createCV,
+		isError: isCreateError,
+		error: createError,
+		showSuccess: showCreateSuccess,
+		setShowSuccess: setShowCreateSuccess,
+		isPending: isCreatePending,
+	} = useCreateCV();
+	const {
+		updateCV,
+		isError: isUpdateError,
+		error: updateError,
+		showSuccess: showUpdateSuccess,
+		setShowSuccess: setShowUpdateSuccess,
+		isPending: isUpdatePending,
+	} = useUpdateCV(cvId || '');
 
 	const router = useRouter();
 
+	const [isStepChanging, setIsStepChanging] = useState(false);
+
 	// Add effect to track showSuccess changes
 	useEffect(() => {
-		if (isError && error) {
+		if ((isCreateError && createError) || (isUpdateError && updateError)) {
+			const error = createError || updateError;
 			setErrorMessage(
-				error instanceof Error ? error.message : 'An error occurred while creating your CV',
+				error instanceof Error ? error.message : 'An error occurred while saving your CV',
 			);
 		}
-	}, [isError, error]);
+	}, [isCreateError, createError, isUpdateError, updateError]);
 
 	const {
 		control,
@@ -64,39 +88,41 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 		formState: { errors },
 	} = useForm<FormData>({
 		resolver: zodResolver(schema),
-		defaultValues: {
-			title: '',
-			firstName: '',
-			lastName: '',
-			email: '',
-			phoneNumber: '',
-			address: '',
-			summary: '',
-			experience: [
-				{
-					jobTitle: '',
-					company: '',
-					startDate: '',
-					endDate: '',
-					responsibilities: '',
-					achievements: '',
-					isCurrent: false,
+		defaultValues: initialData
+			? transformCVToFormData(initialData)
+			: {
+					title: '',
+					firstName: '',
+					lastName: '',
+					email: '',
+					phoneNumber: '',
+					address: '',
+					summary: '',
+					experience: [
+						{
+							jobTitle: '',
+							company: '',
+							startDate: '',
+							endDate: '',
+							responsibilities: '',
+							achievements: '',
+							isCurrent: false,
+						},
+					],
+					education: [{ institution: '', degree: '', graduationYear: '' }],
+					certifications: [
+						{
+							name: '',
+							issuingOrganization: '',
+							issueDate: '',
+							expiryDate: '',
+							credentialId: '',
+							credentialUrl: '',
+						},
+					],
+					skills: [],
+					hobbies: '',
 				},
-			],
-			education: [{ institution: '', degree: '', graduationYear: '' }],
-			certifications: [
-				{
-					name: '',
-					issuingOrganization: '',
-					issueDate: '',
-					expiryDate: '',
-					credentialId: '',
-					credentialUrl: '',
-				},
-			],
-			skills: [],
-			hobbies: '',
-		},
 		mode: 'onTouched',
 	});
 
@@ -129,11 +155,16 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 
 	// Validate current step fields before proceeding
 	const handleNext = async () => {
+		setIsStepChanging(true);
 		const isValid = await trigger(stepFieldGroups[activeStep]);
-		if (!isValid) return;
+		if (!isValid) {
+			setIsStepChanging(false);
+			return;
+		}
 		const newStep = activeStep + 1;
 		setActiveStep(newStep);
 		onStepChange?.(newStep);
+		setTimeout(() => setIsStepChanging(false), 100);
 	};
 
 	// Go back a step
@@ -157,12 +188,17 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 
 	// Final form submission
 	const onSubmitForm = async (data: FormData) => {
+		console.log('onSubmitForm called', data);
 		setErrorMessage(null);
 		try {
-			await createCV(data);
+			if (mode === 'edit' && cvId) {
+				await updateCV(data);
+			} else {
+				await createCV(data);
+			}
 		} catch (error) {
 			setErrorMessage(
-				error instanceof Error ? error.message : 'An error occurred while creating your CV',
+				error instanceof Error ? error.message : 'An error occurred while saving your CV',
 			);
 		}
 	};
@@ -403,9 +439,10 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 											value={value || []}
 											onChange={(_, newValue) => onChange(newValue)}
 											renderTags={(value, getTagProps) =>
-												value.map((option, index) => (
-													<Chip variant="outlined" label={option} {...getTagProps({ index })} />
-												))
+												value.map((option, index) => {
+													const { key, ...tagProps } = getTagProps({ index });
+													return <Chip variant="outlined" label={option} key={key} {...tagProps} />;
+												})
 											}
 											renderInput={(params) => (
 												<TextField
@@ -440,12 +477,15 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 	return (
 		<>
 			<Head>
-				<title>Create Your CV - CV Builder</title>
+				<title>{mode === 'edit' ? 'Edit Your CV' : 'Create Your CV'} - CV Builder</title>
 				<meta
 					name="description"
-					content="Build your professional CV using our easy-to-use multi-step form. Create, edit, and download your CV in PDF format."
+					content={`${mode === 'edit' ? 'Edit' : 'Build'} your professional CV using our easy-to-use multi-step form. Create, edit, and download your CV in PDF format.`}
 				/>
-				<link rel="canonical" href="https://www.example.com/create-cv" />
+				<link
+					rel="canonical"
+					href={`https://www.example.com/${mode === 'edit' ? 'edit-cv' : 'create-cv'}`}
+				/>
 				{/* Example JSON-LD Structured Data (for further SEO enhancements) */}
 				<script
 					type="application/ld+json"
@@ -453,15 +493,22 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 						__html: JSON.stringify({
 							'@context': 'https://schema.org',
 							'@type': 'WebPage',
-							'name': 'Create Your CV - CV Builder',
-							'description': 'Build your professional CV using our multi-step form.',
-							'url': 'https://www.example.com/create-cv',
+							'name': `${mode === 'edit' ? 'Edit' : 'Create'} Your CV - CV Builder`,
+							'description': `${mode === 'edit' ? 'Edit' : 'Build'} your professional CV using our multi-step form.`,
+							'url': `https://www.example.com/${mode === 'edit' ? 'edit-cv' : 'create-cv'}`,
 						}),
 					}}
 				/>
 			</Head>
 			<main role="main" aria-label="CV Creation Form">
-				<Container maxWidth="md" sx={{ py: 4 }}>
+				<Container
+					maxWidth="md"
+					sx={{
+						py: 4,
+						display: 'flex',
+						flexDirection: 'column',
+					}}
+				>
 					<Paper
 						elevation={2}
 						sx={{
@@ -469,6 +516,9 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 							borderRadius: 2,
 							background: 'white',
 							boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+							flex: 1,
+							display: 'flex',
+							flexDirection: 'column',
 						}}
 					>
 						<Box sx={{ width: '100%', mb: 4 }}>
@@ -506,7 +556,20 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 						</Box>
 						<Box sx={{ mt: 4 }}>
 							<AnimatePresence mode="wait">
-								<form onSubmit={handleSubmit(onSubmitForm)}>
+								<form
+									onSubmit={(e) => {
+										if (isStepChanging) {
+											e.preventDefault();
+											return;
+										}
+										handleSubmit(onSubmitForm)(e);
+									}}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') {
+											e.preventDefault();
+										}
+									}}
+								>
 									<motion.div
 										key={activeStep}
 										initial={{ opacity: 0, x: 20 }}
@@ -540,30 +603,11 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 										>
 											Back
 										</Button>
-										{activeStep === steps.length - 1 ? (
+										{activeStep < steps.length - 1 ? (
 											<Button
 												type="button"
 												variant="contained"
-												disabled={isPending}
-												onClick={async () => {
-													const isValid = await trigger(stepFieldGroups[activeStep]);
-													if (isValid) {
-														handleSubmit(onSubmitForm)();
-													}
-												}}
-												sx={{
-													'minWidth': 100,
-													'background': 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-													'&:hover': {
-														background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
-													},
-												}}
-											>
-												{isPending ? <CircularProgress size={24} /> : 'Submit'}
-											</Button>
-										) : (
-											<Button
-												variant="contained"
+												disabled={isCreatePending || isUpdatePending}
 												onClick={handleNext}
 												sx={{
 													'minWidth': 100,
@@ -575,13 +619,32 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 											>
 												Next
 											</Button>
+										) : (
+											<Button
+												type="submit"
+												variant="contained"
+												disabled={isCreatePending || isUpdatePending}
+												sx={{
+													'minWidth': 100,
+													'background': 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+													'&:hover': {
+														background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
+													},
+												}}
+											>
+												{isCreatePending || isUpdatePending ? (
+													<CircularProgress size={24} />
+												) : (
+													'Submit'
+												)}
+											</Button>
 										)}
 									</Box>
 								</form>
 							</AnimatePresence>
 						</Box>
 
-						<Fade in={isError}>
+						<Fade in={!!errorMessage}>
 							<Alert
 								severity="error"
 								sx={{
@@ -591,31 +654,35 @@ const CVCreationForm = ({ onStepChange }: CVCreationFormProps) => {
 									},
 								}}
 							>
-								{(error as ErrorResponse)?.message || 'An error occurred while creating your CV'}
+								{errorMessage || 'An error occurred while saving your CV'}
 							</Alert>
 						</Fade>
 					</Paper>
 				</Container>
 			</main>
 
-			<Notification
-				open={showSuccess}
-				onClose={() => {
-					setShowSuccess(false);
-					router.push('/cvs');
-				}}
-				message="CV created successfully! Click Continue to view your CVs."
-				severity="success"
-				autoHideDuration={undefined}
-			/>
-
-			<Notification
-				open={!!errorMessage}
-				onClose={() => setErrorMessage(null)}
-				message={errorMessage || ''}
-				severity="error"
-				autoHideDuration={6000}
-			/>
+			{(showCreateSuccess || showUpdateSuccess) && !errorMessage && (
+				<Notification
+					open={true}
+					onClose={() => {
+						if (showCreateSuccess) setShowCreateSuccess(false);
+						if (showUpdateSuccess) setShowUpdateSuccess(false);
+						router.push('/cvs');
+					}}
+					message={`CV ${mode === 'edit' ? 'updated' : 'created'} successfully!`}
+					severity="success"
+					autoHideDuration={undefined}
+				/>
+			)}
+			{!!errorMessage && (
+				<Notification
+					open={true}
+					onClose={() => setErrorMessage(null)}
+					message={errorMessage}
+					severity="error"
+					autoHideDuration={6000}
+				/>
+			)}
 		</>
 	);
 };

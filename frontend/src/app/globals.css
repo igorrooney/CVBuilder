@@ -10,7 +10,9 @@ input {
 	border-radius: 4px;
 }
 
-button {
+/* Removed global button styles to avoid conflicts with Material UI */
+
+.button-custom {
 	width: 100%;
 	padding: 10px;
 	background-color: #0056b3;
@@ -20,7 +22,7 @@ button {
 	cursor: pointer;
 }
 
-button:hover {
+.button-custom:hover {
 	background-color: #003f7f;
 }
 

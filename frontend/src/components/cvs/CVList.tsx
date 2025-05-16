@@ -36,6 +36,7 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
+import Link from 'next/link';
 import { useState } from 'react';
 
 type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc';
@@ -107,7 +108,7 @@ export function CVList({
 
 	const renderCVCard = (cv: CVCardProps['cv'], index: number) => {
 		const cardContent = (
-			<>
+			<Link href={`/cvs/${cv.id}`} className="block">
 				<Typography variant="subtitle1" className="max-w-full truncate font-medium">
 					{cv.title || 'Untitled CV'}
 				</Typography>
@@ -115,7 +116,7 @@ export function CVList({
 					Last modified:{' '}
 					{format(new Date(cv.metadata?.lastModified || cv.updatedAt), 'MMM d, yyyy')}
 				</Typography>
-			</>
+			</Link>
 		);
 
 		if (viewMode === 'grid') {
