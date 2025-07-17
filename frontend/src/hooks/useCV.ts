@@ -1,47 +1,80 @@
-import { FormData } from '@/app/create-cv/parts/schema/schema';
-import { databases } from '@/lib/appwrite';
+'use client';
+
+import { CVService } from '@/services/cvService';
+import { CV } from '@/types/cv';
 import { useQuery } from '@tanstack/react-query';
-import { Models } from 'appwrite';
 
-export interface CVData {
-	cv: Models.Document;
-}
+export interface CVData extends CV {}
 
-export function useCV(cvId: string) {
-	return useQuery<CVData, Error>({
-		queryKey: ['cv', cvId],
+export function useCV(id: string) {
+	return useQuery<CVData>({
+		queryKey: ['cv', id],
 		queryFn: async () => {
 			try {
-				// Fetch main CV document only
-				const cv = await databases.getDocument(
-					process.env.NEXT_PUBLIC_APPWRITE_DATABASE!,
-					process.env.NEXT_PUBLIC_APPWRITE_CVS_COLLECTION!,
-					cvId,
-				);
-				return { cv };
-			} catch (error: any) {
-				console.error('Error fetching CV:', error);
-				throw new Error(error.message || 'Failed to fetch CV data');
+				return await CVService.getCVById(id);
+			} catch (error) {
+				if (error instanceof Error) {
+					throw error;
+				}
+				throw new Error('Failed to fetch CV');
 			}
 		},
+		enabled: !!id,
+		staleTime: 5 * 60 * 1000, // 5 minutes
 	});
 }
 
-export function transformCVToFormData(cvData: CVData): FormData {
-	const { cv } = cvData;
-
+export function transformCVToFormData(cv: CVData) {
 	return {
-		title: cv.title,
-		firstName: cv.firstName,
-		lastName: cv.lastName,
-		email: cv.email,
+		title: cv.title || '',
+		firstName: cv.firstName || '',
+		lastName: cv.lastName || '',
+		email: cv.email || '',
 		phoneNumber: cv.phoneNumber || '',
 		address: cv.address || '',
 		summary: cv.summary || '',
-		experience: [], // No experiences fetched
-		education: [], // No education fetched
-		certifications: [], // Initialize with empty array as it's required by FormData
-		skills: cv.skills ? cv.skills.split(',').map((skill: string) => skill.trim()) : [],
+		experience: cv.experience?.map((exp) => ({
+			jobTitle: exp.jobTitle || '',
+			company: exp.company || '',
+			startDate: exp.startDate || '',
+			endDate: exp.endDate || '',
+			responsibilities: exp.responsibilities || '',
+			achievements: exp.achievements || '',
+			isCurrent: exp.isCurrent || false,
+		})) || [
+			{
+				jobTitle: '',
+				company: '',
+				startDate: '',
+				endDate: '',
+				responsibilities: '',
+				achievements: '',
+				isCurrent: false,
+			},
+		],
+		education: cv.education?.map((edu) => ({
+			institution: edu.institution || '',
+			degree: edu.degree || '',
+			graduationYear: edu.graduationYear || '',
+		})) || [{ institution: '', degree: '', graduationYear: '' }],
+		certifications: cv.certifications?.map((cert) => ({
+			name: cert.name || '',
+			issuingOrganization: cert.issuingOrganization || '',
+			issueDate: cert.issueDate || '',
+			expiryDate: cert.expiryDate || '',
+			credentialId: cert.credentialId || '',
+			credentialUrl: cert.credentialUrl || '',
+		})) || [
+			{
+				name: '',
+				issuingOrganization: '',
+				issueDate: '',
+				expiryDate: '',
+				credentialId: '',
+				credentialUrl: '',
+			},
+		],
+		skills: Array.isArray(cv.skills) ? cv.skills : cv.skills ? cv.skills.split(', ') : [],
 		hobbies: cv.hobbies || '',
 	};
 }

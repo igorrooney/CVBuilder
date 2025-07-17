@@ -188,18 +188,22 @@ const CVCreationForm = ({
 
 	// Final form submission
 	const onSubmitForm = async (data: FormData) => {
-		console.log('onSubmitForm called', data);
-		setErrorMessage(null);
 		try {
+			setIsStepChanging(true);
+			setErrorMessage(null);
+
 			if (mode === 'edit' && cvId) {
 				await updateCV(data);
 			} else {
 				await createCV(data);
 			}
+			router.push('/cvs');
 		} catch (error) {
 			setErrorMessage(
 				error instanceof Error ? error.message : 'An error occurred while saving your CV',
 			);
+		} finally {
+			setIsStepChanging(false);
 		}
 	};
 

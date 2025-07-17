@@ -97,17 +97,7 @@ export function CVPreviewButton({ cv }: CVPreviewButtonProps) {
 									</div>
 								)}
 								{exp.achievements && (
-									<ul className="ml-5 mt-1 list-disc text-xs text-gray-500">
-										{typeof exp.achievements === 'string' ? (
-											<li className="break-words">{exp.achievements}</li>
-										) : (
-											exp.achievements.map((ach, i) => (
-												<li key={i} className="break-words">
-													{ach}
-												</li>
-											))
-										)}
-									</ul>
+									<div className="mt-1 break-words text-sm text-gray-600">{exp.achievements}</div>
 								)}
 							</div>
 						))
@@ -237,23 +227,14 @@ export function CVPreviewButton({ cv }: CVPreviewButtonProps) {
 						<h2 className="font-semibold text-gray-800">Hobbies</h2>
 					</div>
 					<div className="flex flex-wrap gap-2">
-						{typeof cv.hobbies === 'string'
-							? cv.hobbies.split(',').map((hobby, idx) => (
-									<span
-										key={idx}
-										className="break-words rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700"
-									>
-										{hobby.trim()}
-									</span>
-								))
-							: cv.hobbies.map((hobby, idx) => (
-									<span
-										key={idx}
-										className="break-words rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700"
-									>
-										{hobby}
-									</span>
-								))}
+						{cv.hobbies.split(',').map((hobby, idx) => (
+							<span
+								key={idx}
+								className="break-words rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700"
+							>
+								{hobby.trim()}
+							</span>
+						))}
 					</div>
 				</div>
 			)}

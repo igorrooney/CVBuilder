@@ -14,7 +14,7 @@ export interface Experience {
 	startDate: string;
 	endDate?: string;
 	responsibilities?: string;
-	achievements?: string[] | string;
+	achievements?: string;
 	isCurrent?: boolean;
 }
 
@@ -50,7 +50,7 @@ export interface CV {
 	skills?: string[] | string;
 	languages?: string[];
 	certifications?: Certification[];
-	hobbies?: string[] | string;
+	hobbies?: string;
 	createdAt: string;
 	updatedAt: string;
 	thumbnail?: string;

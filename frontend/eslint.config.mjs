@@ -12,6 +12,7 @@ export default [
 		ignores: ['node_modules', 'dist', '.next'],
 	},
 	{
+		files: ['**/*.{ts,tsx}'],
 		languageOptions: {
 			parser: tsparser,
 			parserOptions: {
@@ -20,6 +21,11 @@ export default [
 			},
 			sourceType: 'module',
 			ecmaVersion: 'latest',
+			globals: {
+				console: 'readonly',
+				process: 'readonly',
+				fetch: 'readonly',
+			},
 		},
 		plugins: {
 			'@typescript-eslint': tseslint,
@@ -31,6 +37,7 @@ export default [
 		rules: {
 			'prettier/prettier': 'warn',
 			'@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+			'@typescript-eslint/no-explicit-any': 'error',
 			'react/react-in-jsx-scope': 'off',
 			'react-hooks/rules-of-hooks': 'error',
 			'react-hooks/exhaustive-deps': 'warn',

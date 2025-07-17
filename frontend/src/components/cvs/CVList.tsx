@@ -1,15 +1,16 @@
 'use client';
 
+import React from 'react';
 import { CVCardProps } from '@/types/cv';
 import {
 	Delete as DeleteIcon,
-	Download as DownloadIcon,
 	Edit as EditIcon,
 	MoreVert as MoreVertIcon,
 	Search,
 	ViewList,
 	ViewModule,
 	Visibility as VisibilityIcon,
+	Download as DownloadIcon,
 } from '@mui/icons-material';
 import {
 	Box,
@@ -168,21 +169,18 @@ export function CVList({
 												width: '28px',
 												height: '28px',
 											}}
-											onClick={() => onDownload(cv.id)}
-											color="primary"
-										>
-											<DownloadIcon fontSize="small" />
-										</IconButton>
-										<IconButton
-											size="small"
-											sx={{
-												width: '28px',
-												height: '28px',
-											}}
 											onClick={() => onDelete(cv.id)}
 											color="error"
 										>
 											<DeleteIcon fontSize="small" />
+										</IconButton>
+										<IconButton
+											size="small"
+											sx={{ width: '28px', height: '28px' }}
+											onClick={() => onDownload(cv.id)}
+											color="primary"
+										>
+											<DownloadIcon fontSize="small" />
 										</IconButton>
 									</Box>
 								) : (
@@ -221,21 +219,18 @@ export function CVList({
 												width: '20px',
 												height: '20px',
 											}}
-											onClick={() => onDownload(cv.id)}
-											color="primary"
-										>
-											<DownloadIcon fontSize="small" />
-										</IconButton>
-										<IconButton
-											size="small"
-											sx={{
-												width: '20px',
-												height: '20px',
-											}}
 											onClick={() => onDelete(cv.id)}
 											color="error"
 										>
 											<DeleteIcon fontSize="small" />
+										</IconButton>
+										<IconButton
+											size="small"
+											sx={{ width: '28px', height: '28px' }}
+											onClick={() => onDownload(cv.id)}
+											color="primary"
+										>
+											<DownloadIcon fontSize="small" />
 										</IconButton>
 									</Box>
 								)}
@@ -283,15 +278,6 @@ export function CVList({
 									Edit
 								</Button>
 								<Button
-									startIcon={<DownloadIcon />}
-									onClick={() => onDownload(cv.id)}
-									size="small"
-									variant="text"
-									color="primary"
-								>
-									Download
-								</Button>
-								<Button
 									startIcon={<DeleteIcon />}
 									onClick={() => onDelete(cv.id)}
 									size="small"
@@ -300,6 +286,14 @@ export function CVList({
 								>
 									Delete
 								</Button>
+								<IconButton
+									size="small"
+									sx={{ width: '28px', height: '28px' }}
+									onClick={() => onDownload(cv.id)}
+									color="primary"
+								>
+									<DownloadIcon fontSize="small" />
+								</IconButton>
 							</>
 						)}
 					</Box>
@@ -414,12 +408,6 @@ export function CVList({
 						<EditIcon fontSize="small" />
 					</ListItemIcon>
 					Edit
-				</MenuItem>
-				<MenuItem onClick={() => handleAction(onDownload)}>
-					<ListItemIcon>
-						<DownloadIcon fontSize="small" />
-					</ListItemIcon>
-					Download
 				</MenuItem>
 				<MenuItem onClick={() => handleAction(onDelete)} className="text-red-600">
 					<ListItemIcon>

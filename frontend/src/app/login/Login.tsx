@@ -40,65 +40,39 @@ export default function Login() {
 		mode: 'onBlur',
 	});
 
-	const loginMutation = useLogin();
+	const { login, isLoading, isLoggedIn } = useLogin();
 
 	const handleRedirect = () => {
 		const redirectUrl = callbackUrl || '/cvc';
-		console.log('Redirecting to:', redirectUrl);
 		router.push(redirectUrl);
 	};
 
-	// Add success handler to the mutation
+	// Redirect when user is logged in
 	useEffect(() => {
-		if (loginMutation.isSuccess && loginMutation.data) {
+		if (isLoggedIn) {
 			handleRedirect();
 		}
-	}, [loginMutation.isSuccess, loginMutation.data]);
+	}, [isLoggedIn]);
 
 	useEffect(() => {
 		setFocus('email');
 	}, [setFocus]);
 
-	// Log mutation state changes
-	useEffect(() => {
-		console.log('Login mutation state:', {
-			isPending: loginMutation.isPending,
-			isSuccess: loginMutation.isSuccess,
-			isError: loginMutation.isError,
-			error: loginMutation.error,
-			data: loginMutation.data,
-		});
-	}, [
-		loginMutation.isPending,
-		loginMutation.isSuccess,
-		loginMutation.isError,
-		loginMutation.error,
-		loginMutation.data,
-	]);
-
 	const onSubmit = async (data: LoginFormData) => {
 		try {
 			setErrorMessage(null);
-			console.log('Starting login process');
 
-			await loginMutation.mutateAsync({
+			await login({
 				email: data.email,
 				password: data.password,
 			});
 
-			handleRedirect();
+			// Login success will trigger the useEffect above to redirect
 		} catch (error) {
 			console.error('Login error:', error);
 			setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred');
 		}
 	};
-
-	// Backup redirection in case immediate redirect fails
-	useEffect(() => {
-		if (loginMutation.isSuccess && loginMutation.data) {
-			handleRedirect();
-		}
-	}, [loginMutation.isSuccess, loginMutation.data]);
 
 	return (
 		<div className="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8">
@@ -173,10 +147,10 @@ export default function Login() {
 					<div>
 						<Button
 							type="submit"
-							disabled={isSubmitting || loginMutation.isPending}
+							disabled={isSubmitting || isLoading}
 							className="flex w-full justify-center"
 						>
-							{isSubmitting || loginMutation.isPending ? (
+							{isSubmitting || isLoading ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Signing in...
