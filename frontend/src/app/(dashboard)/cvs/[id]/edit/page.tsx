@@ -1,6 +1,6 @@
 'use client';
 
-import CVCreationForm from '@/app/create-cv/CVCreationForm';
+import CVCreationForm from '@/app/(dashboard)/create-cv/CVCreationForm';
 import { useCV } from '@/hooks/useCV';
 import { useLoggedInUser } from '@/hooks/useLoggedInUser';
 import { Box, CircularProgress, Container } from '@mui/material';

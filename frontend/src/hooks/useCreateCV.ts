@@ -1,6 +1,6 @@
 'use client';
 
-import { FormData } from '@/app/create-cv/parts/schema/schema';
+import { FormData } from '@/app/(dashboard)/create-cv/parts/schema/schema';
 import { CVService } from '@/services/cvService';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
