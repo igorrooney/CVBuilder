@@ -5,7 +5,7 @@ import { Input } from '@/components/UI/input';
 import { Label } from '@/components/UI/label';
 import { useRegister } from '@/hooks/useRegister';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -89,25 +89,29 @@ export default function Register() {
 		formState: { errors },
 	} = useForm<FormData>({ resolver: zodResolver(schema), mode: 'onChange' });
 
-	const { isLoading, registerUser } = useRegister();
+	const { isLoading, register } = useRegister();
 	const password = watch('password', '');
 
-	const onSubmit = (data: FormData) => {
-		setErrorMessage(''); // Reset error message before submitting
-		registerUser(data, {
-			onSuccess: () => {
-				setSuccessMessage('Registration successful! Redirecting to login...');
-				setTimeout(() => {
-					router.push('/login');
-				}, 2000);
-			},
-			onError: (error: Error) => {
-				const axiosError = error as AxiosError<{ message?: string }>;
-				setErrorMessage(
-					axiosError.response?.data?.message || 'An error occurred. Please try again.',
-				);
-			},
-		});
+	const onSubmit = async (data: FormData) => {
+		try {
+			setErrorMessage(''); // Reset error message before submitting
+
+			await register({
+				email: data.email,
+				password: data.password,
+				name: `${data.firstName} ${data.lastName}`,
+			});
+
+			setSuccessMessage('Registration successful! Redirecting to login...');
+			setTimeout(() => {
+				router.push('/login');
+			}, 2000);
+		} catch (error) {
+			console.error('Registration error:', error);
+			setErrorMessage(
+				error instanceof Error ? error.message : 'An error occurred. Please try again.',
+			);
+		}
 	};
 
 	return (

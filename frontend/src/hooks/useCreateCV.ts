@@ -1,42 +1,10 @@
 'use client';
 
 import { FormData } from '@/app/create-cv/parts/schema/schema';
-import { account, databases } from '@/lib/appwrite';
+import { CVService } from '@/services/cvService';
 import { useMutation } from '@tanstack/react-query';
-import { ID, Models } from 'appwrite';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
-export interface CVCreationFormData {
-	firstName: string;
-	lastName: string;
-	email: string;
-	phoneNumber: string;
-	address: string;
-	summary: string;
-	skills: string[];
-	hobbies: string[];
-	experience: {
-		jobTitle: string;
-		company: string;
-		startDate: string;
-		endDate: string;
-		responsibilities: string[];
-		achievements: string[];
-		isCurrent: boolean;
-	}[];
-	education: {
-		degree: string;
-		institution: string;
-		graduationYear: string;
-	}[];
-}
-
-export interface CreateCVResult {
-	cv: Models.Document;
-	experienceDocs: Models.Document[];
-	educationDocs: Models.Document[];
-}
+import { analytics, performanceMonitor } from '@/lib/analytics/analytics';
 
 interface CVCreationResponse {
 	success: boolean;
@@ -50,7 +18,6 @@ export function useCreateCV() {
 		message: '',
 		severity: 'success' as 'success' | 'error' | 'warning' | 'info',
 	});
-	const router = useRouter();
 
 	const {
 		mutate: createCV,
@@ -60,57 +27,50 @@ export function useCreateCV() {
 		isSuccess,
 	} = useMutation<CVCreationResponse, Error, FormData>({
 		mutationFn: async (data) => {
+			const startTime = Date.now();
+
 			try {
-				// Get current user with proper error handling
-				let currentUser;
-				try {
-					currentUser = await account.get();
-				} catch (error: any) {
-					if (error.code === 401) {
-						router.push('/login?callbackUrl=/create-cv');
-						throw new Error('Please log in to create a CV');
-					}
-					throw error;
-				}
+				// Track form step completion
+				analytics.trackFormStep(4, 'cv_creation'); // Assuming 4 steps total
 
 				// Convert skills array to string
 				const skillsString = Array.isArray(data.skills)
 					? data.skills.filter((skill) => skill && typeof skill === 'string').join(', ')
 					: '';
 
-				// Create the main CV document only
-				await databases.createDocument(
-					process.env.NEXT_PUBLIC_APPWRITE_DATABASE!,
-					process.env.NEXT_PUBLIC_APPWRITE_CVS_COLLECTION!,
-					ID.unique(),
-					{
-						userId: currentUser.$id,
-						title: data.title,
-						firstName: data.firstName,
-						lastName: data.lastName,
-						email: data.email,
-						phoneNumber: data.phoneNumber,
-						address: data.address,
-						summary: data.summary,
-						skills: skillsString,
-						hobbies: data.hobbies || '',
-					},
-				);
+				// Create CV using the service
+				const result = await CVService.createCV({
+					title: data.title,
+					firstName: data.firstName,
+					lastName: data.lastName,
+					email: data.email,
+					phoneNumber: data.phoneNumber,
+					address: data.address,
+					summary: data.summary,
+					skills: skillsString,
+					hobbies: data.hobbies || '',
+				});
+
+				const duration = Date.now() - startTime;
+				performanceMonitor.measureApiCall('/api/cv', duration, true);
+
+				// Track successful CV creation
+				analytics.trackCVAction('create', result.id);
 
 				return {
 					success: true,
 					message: 'CV created successfully',
 				};
-			} catch (error: any) {
-				console.error('Error creating CV:', error);
-				// Provide more specific error messages
-				if (error.code === 401) {
-					throw new Error('Please log in to create a CV');
-				} else if (error.message) {
-					throw new Error(error.message);
-				} else {
-					throw new Error('Failed to create CV. Please try again.');
+			} catch (error) {
+				const duration = Date.now() - startTime;
+				performanceMonitor.measureApiCall('/api/cv', duration, false);
+
+				// Track error
+				if (error instanceof Error) {
+					analytics.trackError(error, { action: 'cv_creation', data: { title: data.title } });
+					throw error;
 				}
+				throw new Error('Failed to create CV. Please try again.');
 			}
 		},
 		onSuccess: () => {
@@ -120,12 +80,23 @@ export function useCreateCV() {
 				message: 'CV created successfully!',
 				severity: 'success',
 			});
+
+			// Track success event
+			analytics.track('cv_creation_success', {
+				timestamp: Date.now(),
+			});
 		},
 		onError: (error: Error) => {
 			setNotification({
 				open: true,
 				message: error.message || 'Failed to create CV',
 				severity: 'error',
+			});
+
+			// Track error event
+			analytics.track('cv_creation_error', {
+				error: error.message,
+				timestamp: Date.now(),
 			});
 		},
 	});

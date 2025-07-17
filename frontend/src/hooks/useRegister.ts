@@ -1,24 +1,20 @@
-import { useMutation, UseMutationResult } from '@tanstack/react-query';
-import axios from '@/lib/apiClient';
-import { IRegisterPayload } from '@/types/RegisterTypes';
+import { useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { RegisterCredentials } from '@/types/auth';
 
-interface RegisterResponse {
-	message: string;
-}
+export function useRegister() {
+	const { register, isLoading, isLoggedIn, isInitialized } = useAuth();
 
-export const useRegister = (): {
-	registerUser: UseMutationResult<RegisterResponse, Error, IRegisterPayload>['mutate'];
-	isLoading: boolean;
-} => {
-	const mutation = useMutation<RegisterResponse, Error, IRegisterPayload>({
-		mutationFn: async (data: IRegisterPayload) => {
-			const response = await axios.post<RegisterResponse>('/auth/register', data);
-			return response.data;
+	const handleRegister = useCallback(
+		async (credentials: RegisterCredentials) => {
+			await register(credentials);
 		},
-	});
+		[register],
+	);
 
 	return {
-		registerUser: mutation.mutate,
-		isLoading: mutation.status === 'pending',
+		register: handleRegister,
+		isLoading: !isInitialized || isLoading,
+		isLoggedIn,
 	};
-};
+}

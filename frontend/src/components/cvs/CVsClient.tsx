@@ -21,6 +21,7 @@ import { useState } from 'react';
 import { CVList } from './CVList';
 import { PreviewModal } from '../UI/PreviewModal';
 import { CVPreviewButton } from './CVPreviewButton';
+import { analytics, performanceMonitor } from '@/lib/analytics/analytics';
 
 interface CVsClientProps {
 	initialCVs: CV[];
@@ -41,14 +42,28 @@ export function CVsClient({ initialCVs, initialTotal }: CVsClientProps) {
 	const [isPreviewLoading, setIsPreviewLoading] = useState(false);
 
 	const fetchCVs = async (page: number, limit: number) => {
+		const startTime = Date.now();
 		setIsLoading(true);
+
 		try {
 			const { documents, total } = await CVService.getCVs(page, limit);
 			setCvs(documents);
 			setTotal(total);
 			setCurrentPage(page);
+
+			const duration = Date.now() - startTime;
+			performanceMonitor.measureApiCall('/api/cv', duration, true);
+
+			// Track page view
+			analytics.trackPageView('/cvs', { page, limit, total });
 		} catch (error) {
+			const duration = Date.now() - startTime;
+			performanceMonitor.measureApiCall('/api/cv', duration, false);
+
 			console.error('Error fetching CVs:', error);
+			if (error instanceof Error) {
+				analytics.trackError(error, { action: 'fetch_cvs', page, limit });
+			}
 		} finally {
 			setIsLoading(false);
 		}
@@ -56,45 +71,110 @@ export function CVsClient({ initialCVs, initialTotal }: CVsClientProps) {
 
 	const handlePageChange = async (_event: React.ChangeEvent<unknown>, page: number) => {
 		await fetchCVs(page, itemsPerPage);
+		analytics.track('pagination_change', { page, itemsPerPage });
 	};
 
 	const handleItemsPerPageChange = (event: SelectChangeEvent<number>) => {
 		const newItemsPerPage = event.target.value as number;
 		setItemsPerPage(newItemsPerPage);
 		fetchCVs(1, newItemsPerPage);
+		analytics.track('items_per_page_change', { itemsPerPage: newItemsPerPage });
 	};
 
 	const handlePreview = async (id: string) => {
+		const startTime = Date.now();
+
 		try {
 			setIsPreviewLoading(true);
 			const cv = await CVService.getCVById(id);
 			setSelectedCV(cv);
+
+			const duration = Date.now() - startTime;
+			performanceMonitor.measureApiCall(`/api/cv?id=${id}`, duration, true);
+
+			// Track preview action
+			analytics.trackCVAction('preview', id);
 		} catch (error) {
+			const duration = Date.now() - startTime;
+			performanceMonitor.measureApiCall(`/api/cv?id=${id}`, duration, false);
+
 			console.error('Error loading CV preview:', error);
-			// TODO: Show error notification
+			if (error instanceof Error) {
+				analytics.trackError(error, { action: 'preview_cv', cvId: id });
+			}
 		} finally {
 			setIsPreviewLoading(false);
 		}
 	};
 
-	const handleEdit = async (id: string) => router.push(`/cvs/${id}/edit`);
-	const handleDelete = async (id: string) => {
-		await CVService.deleteCV(id);
-		setCvs(cvs.filter((cv) => cv.id !== id));
-		// Refresh total count
-		const { total } = await CVService.getCVs(currentPage, itemsPerPage);
-		setTotal(total);
+	const handleEdit = async (id: string) => {
+		analytics.trackCVAction('edit', id);
+		router.push(`/cvs/${id}/edit`);
 	};
+
+	const handleDelete = async (id: string) => {
+		const startTime = Date.now();
+
+		try {
+			await CVService.deleteCV(id);
+			setCvs(cvs.filter((cv) => cv.id !== id));
+
+			// Refresh total count
+			const { total } = await CVService.getCVs(currentPage, itemsPerPage);
+			setTotal(total);
+
+			const duration = Date.now() - startTime;
+			performanceMonitor.measureApiCall(`/api/cv?id=${id}`, duration, true);
+
+			// Track delete action
+			analytics.trackCVAction('delete', id);
+		} catch (error) {
+			const duration = Date.now() - startTime;
+			performanceMonitor.measureApiCall(`/api/cv?id=${id}`, duration, false);
+
+			console.error('Error deleting CV:', error);
+			if (error instanceof Error) {
+				analytics.trackError(error, { action: 'delete_cv', cvId: id });
+			}
+		}
+	};
+
 	const handleDownload = async (id: string) => {
-		const blob = await CVService.generatePDF(id);
-		const url = window.URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `cv-${id}.pdf`;
-		document.body.appendChild(a);
-		a.click();
-		window.URL.revokeObjectURL(url);
-		document.body.removeChild(a);
+		const startTime = Date.now();
+
+		try {
+			const blob = await CVService.generatePDF(id);
+
+			if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `cv-${id}.pdf`;
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+				document.body.removeChild(a);
+			}
+
+			const duration = Date.now() - startTime;
+			performanceMonitor.measureApiCall(`/api/cv/pdf?id=${id}`, duration, true);
+
+			// Track download action
+			analytics.trackCVAction('download', id);
+		} catch (error) {
+			const duration = Date.now() - startTime;
+			performanceMonitor.measureApiCall(`/api/cv/pdf?id=${id}`, duration, false);
+
+			console.error('Error downloading CV:', error);
+			if (error instanceof Error) {
+				analytics.trackError(error, { action: 'download_cv', cvId: id });
+			}
+		}
+	};
+
+	const handleViewModeChange = (mode: 'grid' | 'list') => {
+		setViewMode(mode);
+		analytics.track('view_mode_change', { mode });
 	};
 
 	return (
@@ -113,7 +193,12 @@ export function CVsClient({ initialCVs, initialTotal }: CVsClientProps) {
 					</Typography>
 				</div>
 				<Link href="/create-cv">
-					<Button variant="contained" startIcon={<Add />} size="large">
+					<Button
+						variant="contained"
+						startIcon={<Add />}
+						size="large"
+						onClick={() => analytics.track('create_cv_button_click')}
+					>
 						Create New CV
 					</Button>
 				</Link>
@@ -126,7 +211,7 @@ export function CVsClient({ initialCVs, initialTotal }: CVsClientProps) {
 				onDelete={handleDelete}
 				onDownload={handleDownload}
 				viewMode={viewMode}
-				onViewModeChange={setViewMode}
+				onViewModeChange={handleViewModeChange}
 				isLoading={isLoading}
 			/>
 

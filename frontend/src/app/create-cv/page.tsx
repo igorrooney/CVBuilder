@@ -2,21 +2,14 @@
 
 import { Container, Box, CircularProgress } from '@mui/material';
 import CVCreationForm from './CVCreationForm';
-import { useLoggedInUser } from '@/hooks/useLoggedInUser';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CreateCVPage() {
-	const { user, isLoading, unauthorized } = useLoggedInUser();
-	const router = useRouter();
+	const { isLoading, isInitialized } = useAuth();
 
-	useEffect(() => {
-		if (!isLoading && (unauthorized || !user)) {
-			router.push('/login?callbackUrl=/create-cv');
-		}
-	}, [isLoading, unauthorized, user, router]);
-
-	if (isLoading) {
+	// Show loading while auth is initializing
+	if (!isInitialized || isLoading) {
 		return (
 			<Box
 				sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
@@ -26,13 +19,11 @@ export default function CreateCVPage() {
 		);
 	}
 
-	if (!user) {
-		return null;
-	}
-
 	return (
-		<Container maxWidth="md" sx={{ py: 4 }}>
-			<CVCreationForm />
-		</Container>
+		<ProtectedRoute>
+			<Container maxWidth="md" sx={{ py: 4 }}>
+				<CVCreationForm />
+			</Container>
+		</ProtectedRoute>
 	);
 }
