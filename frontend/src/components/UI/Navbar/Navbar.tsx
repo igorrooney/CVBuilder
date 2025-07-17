@@ -113,6 +113,18 @@ export default function Navbar() {
 									My CVs
 								</Link>
 							</li>
+							<li>
+								<Link
+									href="/profile"
+									className={`block py-2 pl-3 pr-4 lg:p-0 ${
+										pathname.startsWith('/profile')
+											? 'font-semibold text-indigo-600'
+											: 'text-gray-700 hover:text-indigo-600'
+									}`}
+								>
+									Profile
+								</Link>
+							</li>
 						</ul>
 					</div>
 				</div>
