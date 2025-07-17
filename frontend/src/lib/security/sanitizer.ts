@@ -1,5 +1,14 @@
 import DOMPurify from 'dompurify';
 
+function repeatReplace(str: string, regex: RegExp, replacement: string = ''): string {
+	let prev;
+	do {
+		prev = str;
+		str = str.replace(regex, replacement);
+	} while (str !== prev);
+	return str;
+}
+
 export class InputSanitizer {
 	/**
 	 * Sanitize HTML content to prevent XSS attacks
@@ -11,8 +20,8 @@ export class InputSanitizer {
 				ALLOWED_ATTR: ['href', 'target'],
 			});
 		}
-		// Server-side fallback - basic HTML stripping
-		return html.replace(/<[^>]*>/g, '');
+		// Server-side fallback - robust HTML stripping
+		return repeatReplace(html, /<[^>]*>/g, '');
 	}
 
 	/**
@@ -21,13 +30,14 @@ export class InputSanitizer {
 	static sanitizeText(text: string): string {
 		if (!text || typeof text !== 'string') return '';
 
-		return text
-			.trim()
-			.replace(/[<>]/g, '') // Remove < and >
-			.replace(/javascript:/gi, '') // Remove javascript: protocol
-			.replace(/on\w+=/gi, '') // Remove event handlers
-			.replace(/data:/gi, '') // Remove data: protocol
-			.slice(0, 10000); // Limit length
+		text = text.trim();
+		text = repeatReplace(text, /[<>]/g, ''); // Remove < and >
+		text = text
+			.replace(/javascript:/gi, '')
+			.replace(/vbscript:/gi, '')
+			.replace(/data:/gi, '');
+		text = repeatReplace(text, /on\w+=/gi, ''); // Remove event handlers
+		return text.slice(0, 10000); // Limit length
 	}
 
 	/**

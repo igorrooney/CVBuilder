@@ -1,3 +1,5 @@
+import { generateSecureSessionId } from '@/utils/secure-random';
+
 interface AnalyticsEvent {
 	event: string;
 	properties?: Record<string, unknown>;
@@ -25,7 +27,7 @@ class Analytics {
 	}
 
 	private generateSessionId(): string {
-		return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+		return generateSecureSessionId();
 	}
 
 	setUserId(userId: string): void {
