@@ -1,8 +1,8 @@
 // app/layout.tsx
 import { Providers } from '@/components/providers';
-import Navbar from '@/components/UI/Navbar';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import React from 'react';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -13,15 +13,33 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-	title: 'CV Builder',
-	description: 'Create professional CVs with ease',
-	keywords: ['CV', 'resume', 'builder', 'professional'],
-	authors: [{ name: 'Your Name' }],
+	title: 'British CV Builder - Professional British CV Creation Service',
+	description:
+		'Create stunning, UK-standard CVs that stand out to British employers. Professional British CV creation service for the UK job market.',
+	keywords: [
+		'British CV',
+		'UK CV',
+		'resume',
+		'creation',
+		'service',
+		'professional',
+		'UK job market',
+		'British employers',
+	],
+	authors: [{ name: 'British CV Builder Team' }],
 	robots: 'index, follow',
 	openGraph: {
-		title: 'CV Builder',
-		description: 'Create professional CVs with ease',
+		title: 'British CV Builder - Professional British CV Creation Service',
+		description:
+			'Create stunning, UK-standard CVs that stand out to British employers. Professional British CV creation service for the UK job market.',
 		type: 'website',
+		url: 'https://britishcvbuilder.com',
+		siteName: 'British CV Builder',
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'British CV Builder - Professional British CV Creation Service',
+		description: 'Create stunning, UK-standard CVs that stand out to British employers.',
 	},
 };
 
@@ -30,7 +48,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 		<html lang="en" suppressHydrationWarning>
 			<body className={inter.className} suppressHydrationWarning>
 				<Providers>
-					<Navbar />
 					<main className="min-h-screen bg-gray-50">{children}</main>
 				</Providers>
 			</body>

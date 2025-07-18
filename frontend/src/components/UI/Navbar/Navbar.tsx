@@ -43,7 +43,7 @@ export default function Navbar() {
 							priority
 						/>
 						<span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-							CV Builder
+							British CV Builder
 						</span>
 					</Link>
 
