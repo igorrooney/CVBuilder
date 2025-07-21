@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // List of auth routes that should redirect to home if user is already authenticated
-const authRoutes = ['/login', '/register'];
+const authRoutes = ['/login', '/register', '/forgot-password'];
 
 // List of protected routes that require authentication
-const protectedRoutes = ['/create-cv', '/cvs', '/my-cvs'];
+const protectedRoutes = ['/create-cv', '/cvs', '/my-cvs', '/profile'];
 
 // List of admin routes that require admin role
 const adminRoutes = ['/admin'];

@@ -33,18 +33,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			// Check for existing session
 			const session = await account.getSession('current');
 			if (session) {
-				const user = await account.get();
+				try {
+					const user = await account.get();
 
-				// Set the session cookie for middleware detection
-				setCookie('appwrite_session', session.$id);
+					// Set the session cookie for middleware detection
+					setCookie('appwrite_session', session.$id);
 
-				setAuthState({
-					user: transformUser(user),
-					session,
-					isLoggedIn: true,
-					isLoading: false,
-					isInitialized: true,
-				});
+					setAuthState({
+						user: transformUser(user),
+						session,
+						isLoggedIn: true,
+						isLoading: false,
+						isInitialized: true,
+					});
+				} catch (userError) {
+					console.error('Failed to get user data:', userError);
+					// Session exists but user data fetch failed, clear everything
+					clearCookie('appwrite_session');
+					setAuthState({
+						user: null,
+						session: null,
+						isLoggedIn: false,
+						isLoading: false,
+						isInitialized: true,
+					});
+				}
 			} else {
 				setAuthState((prev) => ({
 					...prev,
@@ -54,6 +67,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			}
 		} catch (error) {
 			console.error('Auth initialization error:', error);
+			// Clear any stale cookies
+			clearCookie('appwrite_session');
 			setAuthState((prev) => ({
 				...prev,
 				isLoading: false,
@@ -115,11 +130,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	const logout = async (): Promise<void> => {
 		try {
-			await account.deleteSession('current');
+			// Try to delete the session, but don't fail if it doesn't work
+			try {
+				await account.deleteSession('current');
+			} catch (sessionError) {
+				console.warn('Session deletion failed, continuing with logout:', sessionError);
+			}
 
 			// Clear the session cookie
 			clearCookie('appwrite_session');
 
+			// Always reset the auth state regardless of session deletion success
 			setAuthState({
 				user: null,
 				session: null,
